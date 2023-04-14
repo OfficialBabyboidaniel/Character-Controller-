@@ -47,9 +47,10 @@ public:
 	bool bDrawDebugNormalMovementORANGE = false;
 	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
 	float DebugLifeTime = 0.1;
-	FVector CollisionFunction(FVector Movement);
+	void PreventCollision();
 
 	FVector CurrentInput = FVector(0);
+	FVector Velocity = FVector(0);
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 200;
