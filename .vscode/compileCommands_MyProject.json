@@ -1,0 +1,90 @@
+[
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProject.Build.cs",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProject.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProject.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectCharacter.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectGameMode.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\PlayerPawn.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\PlayerPawn.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\StaticHelperClass.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\StaticHelperClass.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject\\MyProject.255.rsp"
+		],
+		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+	}
+]
