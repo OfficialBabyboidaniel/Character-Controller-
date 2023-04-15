@@ -12,5 +12,5 @@ class MYPROJECT_API StaticHelperClass
 public:
 	StaticHelperClass();
 	~StaticHelperClass();
-	static FVector DotProduct(FVector, FVector);
+	static FVector DotProduct(const FVector, const FVector);
 };

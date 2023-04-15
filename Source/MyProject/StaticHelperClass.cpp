@@ -12,13 +12,7 @@ StaticHelperClass::~StaticHelperClass()
 
 FVector StaticHelperClass::DotProduct(FVector Velocity, FVector Normal)
 {
-    if (FVector::DotProduct(Velocity, Normal) > 0)
-    {
-        return FVector::ZeroVector;
-    }
-    else
-    {
-        FVector Projection = FVector::DotProduct(Velocity, Normal) * Normal;
-        return -Projection;
-    }
+    float DotProduct = FVector::DotProduct(Velocity, Normal);
+	if (DotProduct > 0) DotProduct = 0;
+	return -(DotProduct * Normal);
 }

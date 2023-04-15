@@ -38,21 +38,21 @@ void APlayerPawn::BeginPlay()
 // Called every frame
 void APlayerPawn::Tick(float DeltaTime)
 {
-
 	Super::Tick(DeltaTime);
-	// Handle movement based on our "MoveX" and "MoveY" axes
+
+	GetActorBounds(true, Origin, Extent);
 	const double Distance = MovementSpeed * DeltaTime;
+	const FVector Movement = CurrentInput * Distance;
+	const FVector GravityForce = FVector::DownVector * Gravity * DeltaTime;
+	Velocity += Movement + GravityForce + JumpMovement;
 
-	FVector GravityForce = FVector::DownVector * Gravity * DeltaTime;
-
-	UE_LOG(LogTemp, Display, TEXT("curreninput is not zero"));
-	FVector Direction = CurrentInput;
-	Velocity = Direction * Distance + GravityForce + (bJump ? FVector(0.0f, 0.0f, (JumpHeight)) : FVector::Zero());
+	UE_LOG(LogTemp, Display, TEXT("Ticking"));
 	UE_LOG(LogTemp, Display, TEXT("Velocity: %f"), Velocity.Size());
-	PreventCollision();
-	FVector CurrentLocation = GetActorLocation();
-	SetActorLocation(CurrentLocation  + Velocity);
+	PreventCollision(DeltaTime);
+	Velocity.Y = 0;
+	SetActorLocation(GetActorLocation() + Velocity * DeltaTime);
 	bJump = false;
+	JumpMovement = FVector(0);
 }
 
 // Called to bind functionality to input
@@ -61,21 +61,12 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent *PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerPawn::JumpInput);
-
-	PlayerInputComponent->BindAxis(
-		"Vertical",
-		this,
-		&APlayerPawn::VerticalInput);
-
-	PlayerInputComponent->BindAxis(
-		"Horizontal",
-		this,
-		&APlayerPawn::HorizontalInput);
+	PlayerInputComponent->BindAxis("Vertical", this, &APlayerPawn::VerticalInput);
+	PlayerInputComponent->BindAxis("Horizontal", this, &APlayerPawn::HorizontalInput);
 }
 
 void APlayerPawn::HorizontalInput(float AxisValue)
 {
-
 	CurrentInput = FVector(AxisValue, 0.0f, CurrentInput.Z);
 }
 
@@ -88,41 +79,55 @@ void APlayerPawn::VerticalInput(float AxisValue)
 void APlayerPawn::JumpInput()
 {
 	FHitResult Hit;
-	// get actor middle point and size
-	FVector Origin, Extent;
-	GetActorBounds(true, Origin, Extent);
-
-	const FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	FHitResult Hit2;
 	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);
+	FCollisionQueryParams QueryParams2;
+	// get actor middle point and size
+	const FVector TraceEnd1 = Origin + FVector::DownVector * (SkinWidth + GroundCheckDistance);
+	const FVector TraceEnd2 = Origin + FVector::UpVector * JumpHeight;
+	bool CollisionCheck = Sweep(Hit, Origin, TraceEnd1, QueryParams);
 
-	UE_LOG(LogTemp, Display, TEXT("in PreventCollision"));
-	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeBox(Extent), QueryParams);
-	if (bHit)
+	if(Sweep(Hit, Origin, TraceEnd1, QueryParams)){
+		if(Sweep(Hit2, Origin, TraceEnd2, QueryParams2))
+		JumpMovement = FVector::UpVector * FMath::Min(JumpHeight, TraceEnd2.Distance(Origin, TraceEnd2));
 		bJump = true;
+
+	} else {
+		JumpMovement = FVector::UpVector * JumpHeight;
+	}
+	UE_LOG(LogTemp, Display, TEXT("in jump "));
 }
 
-void APlayerPawn::PreventCollision()
-{	
+bool APlayerPawn::Sweep(FHitResult &HitResult, const FVector &Start, const FVector &Target, FCollisionQueryParams &Params) const
+{
+   Params.AddIgnoredActor(this);
+	return GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start,
+		Target,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeBox(Extent),
+		Params);
+}
 
+void APlayerPawn::PreventCollision(float DeltaTime)
+{
 	FHitResult Hit;
-	// get actor middle point and size
-	//first Sweep
-	FVector Origin, Extent;
-	GetActorBounds(true, Origin, Extent);
-	const FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth);
+	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * Velocity.Size() * DeltaTime + SkinWidth * Velocity.GetSafeNormal();
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
+
 	bool bHit;
+
 	UE_LOG(LogTemp, Display, TEXT("in PreventCollision"));
-	if (bDrawDebugTraceEndRED)
-		DrawDebugBox(GetWorld(), TraceEnd, Extent, FColor::Red, false, DebugLifeTime);
-	bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeBox(Extent), QueryParams);
-	FHitResult NormalHit;
-	if (Velocity.Size() * GetWorld()->GetDeltaSeconds() < 0.1)
+
+	bHit = Sweep(Hit, Origin, TraceEnd, QueryParams);
+
+	if (Velocity.Size() < 0.1)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Returning Zero Vector"));
-		Velocity =  FVector::ZeroVector;
+		UE_LOG(LogTemp, Warning, TEXT("Returning Zero Vector: Waring recursive Loop"));
+		Velocity = FVector::ZeroVector;
 	}
 	else if (recursiveCounter == 10)
 	{
@@ -133,36 +138,28 @@ void APlayerPawn::PreventCollision()
 	else if (bHit)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Collision detected 1"));
-			bool bHitNew;
-			//second sweep
-			bHitNew = GetWorld()->SweepSingleByChannel(
-			NormalHit,
-			Origin - Hit.Normal * Hit.Distance /*- SkinWidth*/,
-			Hit.ImpactPoint,
-			FQuat::Identity,
-			ECC_Pawn,
-			FCollisionShape::MakeBox(Extent),
-			QueryParams);
-		//if (!bHitNew)
-		//{
-		//	UE_LOG(LogTemp, Display, TEXT("no more collisions"));
-		//	recursiveCounter = 0;
-		//	return -(Hit.Normal * (NormalHit.Distance - SkinWidth));
-		//}
-		//skälarprodukten
 
-		FVector DotProduct = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
-		FVector NormalF = Velocity.GetSafeNormal();
-		FVector NormalizedMovement = DotProduct + NormalF;
-		recursiveCounter++;
+		FVector TraceStart = Hit.ImpactPoint - Hit.Normal * Hit.Distance;
+		TraceStart.Y -= Extent.Y;
+		FVector NormalTraceEnd = Hit.ImpactPoint;
+		NormalTraceEnd.Y -= Extent.Y;
+		FHitResult NormalHit;
+		FCollisionQueryParams NormalParams;
+		NormalParams.AddIgnoredActor(Hit.GetActor());
+		// second sweep
+		bHit = Sweep(NormalHit, TraceStart, NormalTraceEnd, NormalParams);
+		if (bHit)
+		{
+		
+			Velocity = -(NormalHit.Normal * (NormalHit.Distance + SkinWidth));
+			UE_LOG(LogTemp, Display, TEXT("Return 2, %d"), recursiveCounter++);
+			return;
+		}
+
+		FVector NormalF = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
+		Velocity += NormalF + Hit.ImpactNormal * SkinWidth;
+		UE_LOG(LogTemp, Display, TEXT("Finished, %d"), recursiveCounter++);
 		UE_LOG(LogTemp, Display, TEXT("looking for more collisions"));
-		Velocity = NormalizedMovement;
-		PreventCollision();
-	}
-	else
-	{
-		recursiveCounter = 0;
-		UE_LOG(LogTemp, Display, TEXT("returning movement"));
-	//	SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth));
+		Velocity = NormalF;
 	}
 }
