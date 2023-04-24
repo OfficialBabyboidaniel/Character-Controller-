@@ -2,19 +2,19 @@
     "configurations": [
         {
             "name": "MyProjectEditor Editor Win64 Development (MyProject)",
-            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+            "compilerPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "msvc-x64",
-            "compileCommands": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_MyProject.json"
+            "compileCommands": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_MyProject.json"
         },
         {
             "name": "Win32",
-            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
+            "compilerPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "msvc-x64",
-            "compileCommands": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default.json"
+            "compileCommands": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default.json"
         }
     ],
     "version": 4

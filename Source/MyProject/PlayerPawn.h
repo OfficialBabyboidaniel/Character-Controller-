@@ -33,42 +33,27 @@ public:
 	void VerticalInput(float AxisValue);
 	void JumpInput();
 
+	//hjälp funktion
 	bool Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
 		FCollisionQueryParams& Params) const;
 
-	//is this needed?
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	bool bDrawDebugActorBLACK = false;
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	bool bDrawDebugTraceEndRED = false;
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	bool bDrawDebugImpactGREEN = false;
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	bool bDrawDebugNormalStartMAGENTA = false;
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	bool bDrawDebugNormalImpactBLUE = false;
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	bool bDrawDebugNormalMovementORANGE = false;
-	UPROPERTY(EditAnywhere, Category="MyPawn|Debug")
-	float DebugLifeTime = 0.1;
-
-
 	void PreventCollision(float);
 
+	//vetors 
 	FVector CurrentInput = FVector(0);
 	FVector JumpMovement = FVector(0);
 	FVector Velocity = FVector(0);
 
+	//vectors for bounds
 	FVector Origin = FVector(0);
 	FVector Extent = FVector(0);
-	float SmallMovement = 1;
 
+
+	//editable variables
 	UPROPERTY(EditAnywhere)
 	float Gravity = 980;
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 200;
-	UPROPERTY(EditAnywhere)
-	bool bJump; 
 	UPROPERTY(EditAnywhere)
 	float JumpHeight = 200;
 	UPROPERTY(EditAnywhere)
@@ -76,6 +61,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	float GroundCheckDistance = 3;
 
+	//helper variables 
+	float SmallMovement = 1;
 	int recursiveCounter = 0;
 	
 	

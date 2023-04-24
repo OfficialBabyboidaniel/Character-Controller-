@@ -9,6 +9,7 @@
 APlayerPawn::APlayerPawn()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// aktiver tick
 	PrimaryActorTick.bCanEverTick = true;
 	// auto posses player 0
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -20,12 +21,15 @@ APlayerPawn::APlayerPawn()
 	auto PlayerCamera = CreateDefaultSubobject<UCameraComponent>(
 		TEXT("PlayerCamera"));
 
+	// setup camera
 	PlayerCamera->SetupAttachment(RootComponent);
 	PlayerCamera->SetRelativeLocation(FVector(0.0f, 1600.0f, 200.0f));
 	PlayerCamera->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
+	// set to 2d view
 	PlayerCamera->ProjectionMode = ECameraProjectionMode::Orthographic;
 	PlayerCamera->OrthoWidth = 3200.f;
+
 	OurVisibleComponent->SetupAttachment(RootComponent);
 }
 
@@ -51,7 +55,6 @@ void APlayerPawn::Tick(float DeltaTime)
 	PreventCollision(DeltaTime);
 	Velocity.Y = 0;
 	SetActorLocation(GetActorLocation() + Velocity * DeltaTime);
-	bJump = false;
 	JumpMovement = FVector(0);
 }
 
@@ -60,47 +63,50 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent *PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// bind inputs
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerPawn::JumpInput);
 	PlayerInputComponent->BindAxis("Vertical", this, &APlayerPawn::VerticalInput);
 	PlayerInputComponent->BindAxis("Horizontal", this, &APlayerPawn::HorizontalInput);
 }
 
+// horizontal axis input
 void APlayerPawn::HorizontalInput(float AxisValue)
 {
 	CurrentInput = FVector(AxisValue, 0.0f, CurrentInput.Z);
 }
-
+// vertical axis input
 void APlayerPawn::VerticalInput(float AxisValue)
 {
 
 	CurrentInput = FVector(CurrentInput.X, 0.0f, AxisValue);
 }
-
+// jump input
 void APlayerPawn::JumpInput()
 {
-	FHitResult Hit;
-	FHitResult Hit2;
+	// check if grounded
+	// Check what is above
+	FHitResult GroundedHit;
+	FHitResult JumpHit;
 	FCollisionQueryParams QueryParams;
 	FCollisionQueryParams QueryParams2;
-	// get actor middle point and size
-	const FVector TraceEnd1 = Origin + FVector::DownVector * (SkinWidth + GroundCheckDistance);
-	const FVector TraceEnd2 = Origin + FVector::UpVector * JumpHeight;
-	bool CollisionCheck = Sweep(Hit, Origin, TraceEnd1, QueryParams);
+	const FVector TraceEndDownwards = Origin + FVector::DownVector * (SkinWidth + GroundCheckDistance);
+	const FVector TraceEndUpwards = Origin + FVector::UpVector * JumpHeight;
+	bool CollisionCheck = Sweep(GroundedHit, Origin, TraceEndDownwards, QueryParams);
 
-	if(Sweep(Hit, Origin, TraceEnd1, QueryParams)){
-		if(Sweep(Hit2, Origin, TraceEnd2, QueryParams2))
-		JumpMovement = FVector::UpVector * FMath::Min(JumpHeight, TraceEnd2.Distance(Origin, TraceEnd2));
-		bJump = true;
-
-	} else {
+	if (Sweep(GroundedHit, Origin, TraceEndDownwards, QueryParams))
+	{
+		if (Sweep(JumpHit, Origin, TraceEndUpwards, QueryParams2))
+			JumpMovement = FVector::UpVector * FMath::Min(JumpHeight, TraceEndUpwards.Distance(Origin, TraceEndUpwards));
+	
 		JumpMovement = FVector::UpVector * JumpHeight;
+		UE_LOG(LogTemp, Display, TEXT("Jumpmovment %f"), JumpMovement.Size());
 	}
 	UE_LOG(LogTemp, Display, TEXT("in jump "));
 }
 
 bool APlayerPawn::Sweep(FHitResult &HitResult, const FVector &Start, const FVector &Target, FCollisionQueryParams &Params) const
 {
-   Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(this);
 	return GetWorld()->SweepSingleByChannel(
 		HitResult,
 		Start,
@@ -124,7 +130,7 @@ void APlayerPawn::PreventCollision(float DeltaTime)
 
 	bHit = Sweep(Hit, Origin, TraceEnd, QueryParams);
 
-	if (Velocity.Size() < 0.1)
+	if (Velocity.Size() * DeltaTime <  SmallMovement)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Returning Zero Vector: Waring recursive Loop"));
 		Velocity = FVector::ZeroVector;
@@ -150,7 +156,7 @@ void APlayerPawn::PreventCollision(float DeltaTime)
 		bHit = Sweep(NormalHit, TraceStart, NormalTraceEnd, NormalParams);
 		if (bHit)
 		{
-		
+
 			Velocity = -(NormalHit.Normal * (NormalHit.Distance + SkinWidth));
 			UE_LOG(LogTemp, Display, TEXT("Return 2, %d"), recursiveCounter++);
 			return;
