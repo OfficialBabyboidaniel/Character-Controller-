@@ -2,14 +2,6 @@
 
 #include "StaticHelperClass.h"
 
-StaticHelperClass::StaticHelperClass()
-{
-}
-
-StaticHelperClass::~StaticHelperClass()
-{
-}
-
 FVector StaticHelperClass::DotProduct(FVector Velocity, FVector Normal)
 {
     float DotProduct = FVector::DotProduct(Velocity, Normal);

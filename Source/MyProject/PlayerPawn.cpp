@@ -49,8 +49,7 @@ void APlayerPawn::Tick(float DeltaTime)
 	const FVector Movement = CurrentInput * Distance;
 	const FVector GravityForce = FVector::DownVector * Gravity * DeltaTime;
 	Velocity += Movement + GravityForce + JumpMovement;
-
-	UE_LOG(LogTemp, Display, TEXT("Ticking"));
+	
 	UE_LOG(LogTemp, Display, TEXT("Velocity: %f"), Velocity.Size());
 	PreventCollision(DeltaTime);
 	Velocity.Y = 0;
@@ -168,4 +167,5 @@ void APlayerPawn::PreventCollision(float DeltaTime)
 		UE_LOG(LogTemp, Display, TEXT("looking for more collisions"));
 		Velocity = NormalF;
 	}
+	
 }
