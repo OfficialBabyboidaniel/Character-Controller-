@@ -22,33 +22,19 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
-
 	UPROPERTY(EditAnywhere)
 	USceneComponent *OurVisibleComponent;
-
+	
 	void HorizontalInput(float AxisValue);
 	void VerticalInput(float AxisValue);
 	void JumpInput();
-
 	//hjälp funktion
-	bool Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
-		FCollisionQueryParams& Params) const;
-
-	void PreventCollision(float);
-
 	//vetors 
-	FVector CurrentInput = FVector(0);
+	/*FVector CurrentInput = FVector(0);
 	FVector JumpMovement = FVector(0);
 	FVector Velocity = FVector(0);
-
-	//vectors for bounds
-	FVector Origin = FVector(0);
-	FVector Extent = FVector(0);
-
-
 	//editable variables
 	UPROPERTY(EditAnywhere)
 	float Gravity = 980;
@@ -59,11 +45,27 @@ public:
 	UPROPERTY(EditAnywhere)
 	float SkinWidth = 1;
 	UPROPERTY(EditAnywhere)
-	float GroundCheckDistance = 3;
-
-	//helper variables 
+	float GroundCheckDistance = 3;*/
+	//helper variables
+	
+	//vectors for bounds
+	/*FVector Origin = FVector(0);
+	FVector Extent = FVector(0);*/
 	float SmallMovement = 1;
 	int recursiveCounter = 0;
+	bool SweepHit;
+
+	//ny start
+	FVector CurrentInput = FVector(0);
+	FVector bJump = FVector(0);
+	//Values
+	UPROPERTY(EditAnywhere, Category="Stats")
+	double MovementSpeed = 100;
+
+	
+	bool Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
+		FCollisionQueryParams& Params) const;
+	void PreventCollision(float DeltaTime, FVector Movement);
 	
 	
 };
