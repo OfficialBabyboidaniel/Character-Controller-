@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerPawn.h"
+
+#include <Windows.Graphics.Display.h>
+
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Sampling/NormalHistogram.h"
@@ -9,7 +12,7 @@
 APlayerPawn::APlayerPawn()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	// aktiver tick
+	// aktivera tick
 	PrimaryActorTick.bCanEverTick = true;
 	// auto posses player 0
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -44,21 +47,30 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	/*
 	GetActorBounds(true, Origin, Extent);
 	const double Distance = MovementSpeed * DeltaTime;
-	const FVector Movement = CurrentInput * Distance;
+	const FVector Movement = CurrentInput * Distance * DeltaTime;
 	const FVector GravityForce = FVector::DownVector * Gravity * DeltaTime;
+	UE_LOG(LogTemp, Display, TEXT("Gravity vector = %s"), *GravityForce.ToString());
+	
 	Velocity += Movement + GravityForce + JumpMovement;
 	
 	UE_LOG(LogTemp, Display, TEXT("Velocity: %f"), Velocity.Size());
 	PreventCollision(DeltaTime);
 	Velocity.Y = 0;
 	SetActorLocation(GetActorLocation() + Velocity * DeltaTime);
-	JumpMovement = FVector(0);
+	JumpMovement = FVector(0);*/
+
+	const double Distance = MovementSpeed * DeltaTime;
+	const FVector CurrentLocation = GetActorLocation();
+	FVector Movement = CurrentInput * Distance;
+	PreventCollision(DeltaTime, Movement);
+	if (!SweepHit) SetActorLocation(CurrentLocation + Movement);
 }
 
 // Called to bind functionality to input
-void APlayerPawn::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
+void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -73,18 +85,19 @@ void APlayerPawn::HorizontalInput(float AxisValue)
 {
 	CurrentInput = FVector(AxisValue, 0.0f, CurrentInput.Z);
 }
+
 // vertical axis input
 void APlayerPawn::VerticalInput(float AxisValue)
 {
-
 	CurrentInput = FVector(CurrentInput.X, 0.0f, AxisValue);
 }
+
 // jump input
 void APlayerPawn::JumpInput()
 {
 	// check if grounded
 	// Check what is above
-	FHitResult GroundedHit;
+	/*FHitResult GroundedHit;
 	FHitResult JumpHit;
 	FCollisionQueryParams QueryParams;
 	FCollisionQueryParams QueryParams2;
@@ -100,25 +113,21 @@ void APlayerPawn::JumpInput()
 		JumpMovement = FVector::UpVector * JumpHeight;
 		UE_LOG(LogTemp, Display, TEXT("Jumpmovment %f"), JumpMovement.Size());
 	}
-	UE_LOG(LogTemp, Display, TEXT("in jump "));
+	UE_LOG(LogTemp, Display, TEXT("in jump "));*/
 }
 
-bool APlayerPawn::Sweep(FHitResult &HitResult, const FVector &Start, const FVector &Target, FCollisionQueryParams &Params) const
-{
-	Params.AddIgnoredActor(this);
-	return GetWorld()->SweepSingleByChannel(
-		HitResult,
-		Start,
-		Target,
-		FQuat::Identity,
-		ECC_Pawn,
-		FCollisionShape::MakeBox(Extent),
-		Params);
-}
 
-void APlayerPawn::PreventCollision(float DeltaTime)
+void APlayerPawn::PreventCollision(float DeltaTime, FVector Movement)
 {
 	FHitResult Hit;
+	FVector TraceStart = GetActorLocation();
+	FVector TraceEnd = GetActorLocation() + Movement;
+	FCollisionQueryParams Params;
+	SweepHit = Sweep(Hit, TraceStart, TraceEnd, Params);
+	UE_LOG(LogTemp, Warning, TEXT("bhit = %hhd"), SweepHit);
+
+
+	/*FHitResult Hit;
 	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * Velocity.Size() * DeltaTime + SkinWidth * Velocity.GetSafeNormal();
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
@@ -131,7 +140,7 @@ void APlayerPawn::PreventCollision(float DeltaTime)
 
 	if (Velocity.Size() * DeltaTime <  SmallMovement)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Returning Zero Vector: Waring recursive Loop"));
+		UE_LOG(LogTemp, Warning, TEXT("returning zero vector, small movement"));
 		Velocity = FVector::ZeroVector;
 	}
 	else if (recursiveCounter == 10)
@@ -167,5 +176,22 @@ void APlayerPawn::PreventCollision(float DeltaTime)
 		UE_LOG(LogTemp, Display, TEXT("looking for more collisions"));
 		Velocity = NormalF;
 	}
-	
+	*/
+}
+
+
+bool APlayerPawn::Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
+                        FCollisionQueryParams& Params) const
+{
+	Params.AddIgnoredActor(this);
+	FVector Origin, Extent;
+	GetActorBounds(true, Origin, Extent);
+	return GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start,
+		Target,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeBox(Extent),
+		Params);
 }
