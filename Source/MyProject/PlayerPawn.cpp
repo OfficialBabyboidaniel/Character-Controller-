@@ -67,6 +67,8 @@ void APlayerPawn::Tick(float DeltaTime)
 	FVector Movement = CurrentInput * Distance;
 	PreventCollision(DeltaTime, Movement);
 	if (!SweepHit) SetActorLocation(CurrentLocation + Movement);
+	// kolla här 
+	if(SweepHit) SetActorLocation(CurrentLocation + Movement.GetSafeNormal() * Hit.Distance);
 }
 
 // Called to bind functionality to input
@@ -119,7 +121,7 @@ void APlayerPawn::JumpInput()
 
 void APlayerPawn::PreventCollision(float DeltaTime, FVector Movement)
 {
-	FHitResult Hit;
+	
 	FVector TraceStart = GetActorLocation();
 	FVector TraceEnd = GetActorLocation() + Movement;
 	FCollisionQueryParams Params;
