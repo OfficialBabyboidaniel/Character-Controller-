@@ -54,6 +54,7 @@ public:
 	float SmallMovement = 1;
 	int recursiveCounter = 0;
 	bool SweepHit;
+	FHitResult Hit;
 
 	//ny start
 	FVector CurrentInput = FVector(0);
