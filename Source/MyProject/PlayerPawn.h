@@ -49,24 +49,30 @@ public:
 	//helper variables
 	
 	//vectors for bounds
-	/*FVector Origin = FVector(0);
-	FVector Extent = FVector(0);*/
+	FVector Origin = FVector(0);
+	FVector Extent = FVector(0);
 	float SmallMovement = 1;
 	int recursiveCounter = 0;
 	bool SweepHit;
 	FHitResult Hit;
+	
 
 	//ny start
 	FVector CurrentInput = FVector(0);
 	FVector bJump = FVector(0);
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float SkinWidth = 1;
+	
 	//Values
 	UPROPERTY(EditAnywhere, Category="Stats")
-	double MovementSpeed = 100;
+	double MovementSpeed = 50;
+
+	
 
 	
 	bool Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
 		FCollisionQueryParams& Params) const;
-	void PreventCollision(float DeltaTime, FVector Movement);
+	FVector PreventCollision(float DeltaTime, FVector Movement);
 	
 	
 };
