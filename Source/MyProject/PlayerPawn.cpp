@@ -89,6 +89,7 @@ void APlayerPawn::VerticalInput(float AxisValue)
 // jump input
 void APlayerPawn::JumpInput()
 {
+	
 }
 
 FVector APlayerPawn::CollisionFunction(FVector Movement)

@@ -45,6 +45,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float SkinWidth = 2.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
+	float GroundCheckDistance = 1.5f; 
+	UPROPERTY(EditAnywhere, Category="Stats")
 	float GravityForce = 500.0f;
 	
 	//functions
