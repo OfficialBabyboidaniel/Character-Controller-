@@ -26,53 +26,28 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 	UPROPERTY(EditAnywhere)
 	USceneComponent *OurVisibleComponent;
-	
+
+	//Inputs
 	void HorizontalInput(float AxisValue);
 	void VerticalInput(float AxisValue);
 	void JumpInput();
-	//hjälp funktion
-	//vetors 
-	/*FVector CurrentInput = FVector(0);
-	FVector JumpMovement = FVector(0);
-	FVector Velocity = FVector(0);
-	//editable variables
-	UPROPERTY(EditAnywhere)
-	float Gravity = 980;
-	UPROPERTY(EditAnywhere)
-	float MovementSpeed = 200;
-	UPROPERTY(EditAnywhere)
-	float JumpHeight = 200;
-	UPROPERTY(EditAnywhere)
-	float SkinWidth = 1;
-	UPROPERTY(EditAnywhere)
-	float GroundCheckDistance = 3;*/
-	//helper variables
-	
-	//vectors for bounds
-	FVector Origin = FVector(0);
-	FVector Extent = FVector(0);
-	float SmallMovement = 1;
-	int recursiveCounter = 0;
-	bool SweepHit;
-	FHitResult Hit;
-	
 
-	//ny start
-	FVector CurrentInput = FVector(0);
-	FVector bJump = FVector(0);
+	//Vectors values
+	FVector CurrentInput;
+
+	//Sweep values
+	FVector Origin, Extent;
+	FCollisionQueryParams Params;
+
+	//stats
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float SkinWidth = 1;
-	
-	//Values
+	float MovementSpeed = 600.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	double MovementSpeed = 50;
-
+	float SkinWidth = 2.0f;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float GravityForce = 500.0f;
 	
-
-	
-	bool Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
-		FCollisionQueryParams& Params) const;
-	FVector PreventCollision(float DeltaTime, FVector Movement);
-	
+	//functions
+	FVector CollisionFunction(FVector Movement);
 	
 };
