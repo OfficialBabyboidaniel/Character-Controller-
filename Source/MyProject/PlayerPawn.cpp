@@ -40,7 +40,6 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -48,35 +47,19 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*
-	GetActorBounds(true, Origin, Extent);
+	//DrawDebugBox(GetWorld(), Origin, Extent, FColor::Red, true);
+
 	const double Distance = MovementSpeed * DeltaTime;
-	const FVector Movement = CurrentInput * Distance * DeltaTime;
-	const FVector GravityForce = FVector::DownVector * Gravity * DeltaTime;
-	UE_LOG(LogTemp, Display, TEXT("Gravity vector = %s"), *GravityForce.ToString());
-	
-	Velocity += Movement + GravityForce + JumpMovement;
-	
-	UE_LOG(LogTemp, Display, TEXT("Velocity: %f"), Velocity.Size());
-	PreventCollision(DeltaTime);
-	Velocity.Y = 0;
-	SetActorLocation(GetActorLocation() + Velocity * DeltaTime);
-	JumpMovement = FVector(0);*/
-	
-	
-	DrawDebugBox(GetWorld(), Origin, Extent, FColor::Red, true);
-	
-	const double Distance = MovementSpeed * DeltaTime;
+	FVector Gravity = FVector::DownVector * GravityForce * DeltaTime;
+	FVector InputMovement = CurrentInput * Distance;
+	FVector Velocity = InputMovement + Gravity + JumpMovement;
+
 	const FVector CurrentLocation = GetActorLocation();
-	FVector Movement = CurrentInput * Distance;
-	//PreventCollision(DeltaTime, Movement);
+	FVector ProcessedMovement = CollisionFunction(Velocity);
+	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
 	
-	 SetActorLocation(CurrentLocation + PreventCollision(DeltaTime, Movement));
-	if (SweepHit)
-	{
-		DrawDebugBox(GetWorld(), Hit.ImpactPoint, Extent, FColor::Red, true);
-	}
-	// kolla här 
+	SetActorLocation(CurrentLocation + ProcessedMovement);
+	JumpMovement = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -106,35 +89,36 @@ void APlayerPawn::VerticalInput(float AxisValue)
 // jump input
 void APlayerPawn::JumpInput()
 {
-	
-}
-
-
-FVector APlayerPawn::PreventCollision(float DeltaTime, FVector Movement)
-{
-	FVector TraceStart = GetActorLocation();
-	FVector TraceEnd = Origin + Movement.GetSafeNormal2D() /** (Movement.Size() * SkinWidth)*/;
-	FCollisionQueryParams Params;
 	GetActorBounds(true, Origin, Extent);
-	SweepHit = Sweep(Hit, TraceStart, TraceEnd, Params);
-	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.f, 8, FColor::Red, true);
-	if (SweepHit) return Movement.GetSafeNormal2D() /** (Hit.Distance - SkinWidth)*/;
-	else
-		return Movement;
+	FHitResult Hit;
+	FVector TraceStart = Origin;
+	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	Params.AddIgnoredActor(this);
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
+	                                             FCollisionShape::MakeBox(Extent), Params);
+	if (bHit)
+	{
+		JumpMovement = FVector(0, 0, JumpForce);
+	}
 }
 
-
-bool APlayerPawn::Sweep(FHitResult& HitResult, const FVector& Start, const FVector& Target,
-                        FCollisionQueryParams& Params) const
+FVector APlayerPawn::CollisionFunction(FVector Movement)
 {
-	
+	GetActorBounds(true, Origin, Extent);
+	FHitResult Hit;
+	FVector TraceStart = Origin;
+	FVector TraceEnd = Origin + Movement.GetSafeNormal() * (Movement.Size() + SkinWidth);
 	Params.AddIgnoredActor(this);
-	return GetWorld()->SweepSingleByChannel(
-		HitResult,
-		Start,
-		Target,
-		FQuat::Identity,
-		ECC_Pawn,
-		FCollisionShape::MakeBox(Extent),
-		Params);
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
+	                                             FCollisionShape::MakeBox(Extent), Params);
+	if (bHit)
+	{
+		FVector NormalF = StaticHelperClass::DotProduct(Movement, Hit.Normal);
+		UE_LOG(LogTemp, Warning, TEXT("NormalF: %s"), *NormalF.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Movement: %s"), *Movement.ToString());
+		FVector FullMovement = Movement + NormalF;
+		UE_LOG(LogTemp, Warning, TEXT("FullMovement: %s"), *FullMovement.ToString());
+		return FullMovement;
+	}
+	return Movement;
 }
