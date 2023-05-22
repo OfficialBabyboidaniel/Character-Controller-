@@ -49,17 +49,17 @@ void APlayerPawn::Tick(float DeltaTime)
 
 	//DrawDebugBox(GetWorld(), Origin, Extent, FColor::Red, true);
 
-
 	const double Distance = MovementSpeed * DeltaTime;
-	const FVector CurrentLocation = GetActorLocation();
 	FVector Gravity = FVector::DownVector * GravityForce * DeltaTime;
+	FVector InputMovement = CurrentInput * Distance;
+	FVector Velocity = InputMovement + Gravity + JumpMovement;
 
-	// UE_LOG(LogTemp, Warning, TEXT("Gravity: %s"), *Gravity.ToString());
-
-	FVector Movement = CurrentInput * Distance + Gravity;
-	//UE_LOG(LogTemp, Warning, TEXT("Movement: %s"), *Movement.ToString());
-	FVector ProcessedMovement = CollisionFunction(Movement);
+	const FVector CurrentLocation = GetActorLocation();
+	FVector ProcessedMovement = CollisionFunction(Velocity);
+	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
+	
 	SetActorLocation(CurrentLocation + ProcessedMovement);
+	JumpMovement = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -89,7 +89,17 @@ void APlayerPawn::VerticalInput(float AxisValue)
 // jump input
 void APlayerPawn::JumpInput()
 {
-	
+	GetActorBounds(true, Origin, Extent);
+	FHitResult Hit;
+	FVector TraceStart = Origin;
+	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	Params.AddIgnoredActor(this);
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
+	                                             FCollisionShape::MakeBox(Extent), Params);
+	if (bHit)
+	{
+		JumpMovement = FVector(0, 0, JumpForce);
+	}
 }
 
 FVector APlayerPawn::CollisionFunction(FVector Movement)
@@ -101,6 +111,14 @@ FVector APlayerPawn::CollisionFunction(FVector Movement)
 	Params.AddIgnoredActor(this);
 	bool bHit = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeBox(Extent), Params);
-	if (bHit) return Movement.GetSafeNormal() * (Hit.Distance - SkinWidth);
+	if (bHit)
+	{
+		FVector NormalF = StaticHelperClass::DotProduct(Movement, Hit.Normal);
+		UE_LOG(LogTemp, Warning, TEXT("NormalF: %s"), *NormalF.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Movement: %s"), *Movement.ToString());
+		FVector FullMovement = Movement + NormalF;
+		UE_LOG(LogTemp, Warning, TEXT("FullMovement: %s"), *FullMovement.ToString());
+		return FullMovement;
+	}
 	return Movement;
 }

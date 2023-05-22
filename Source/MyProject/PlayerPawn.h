@@ -43,11 +43,15 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float MovementSpeed = 600.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float SkinWidth = 2.0f;
+	float SkinWidth = 1.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 1.5f; 
+	float GroundCheckDistance = 0.5f; 
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float GravityForce = 500.0f;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float JumpForce = 100.0f;
+	
+	FVector JumpMovement;	
 	
 	//functions
 	FVector CollisionFunction(FVector Movement);
