@@ -8,6 +8,9 @@
 #include "Components/InputComponent.h"
 #include "Sampling/NormalHistogram.h"
 #include "StaticHelperClass.h"
+#include "Styling/StyleColors.h"
+#include "Util/ColorConstants.h"
+#include "DrawDebugHelpers.h"
 // Sets default values
 APlayerPawn::APlayerPawn()
 {
@@ -54,10 +57,10 @@ void APlayerPawn::Tick(float DeltaTime)
 	FVector InputMovement = CurrentInput * Distance;
 	FVector Velocity = InputMovement + Gravity + JumpMovement;
 
+	FVector ProcessedMovement = CollisionFunction(Velocity, RecursivCounter);
 	const FVector CurrentLocation = GetActorLocation();
-	FVector ProcessedMovement = CollisionFunction(Velocity);
 	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
-	
+
 	SetActorLocation(CurrentLocation + ProcessedMovement);
 	JumpMovement = FVector::ZeroVector;
 }
@@ -102,8 +105,22 @@ void APlayerPawn::JumpInput()
 	}
 }
 
-FVector APlayerPawn::CollisionFunction(FVector Movement)
+FVector APlayerPawn::CollisionFunction(FVector Movement, int counter)
 {
+	RecursivCounter = counter;
+	UE_LOG(LogTemp, Warning, TEXT("Recursiv cOUNTER: %d"), RecursivCounter);
+	if (Movement.Size() < LowForce)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Returning small vector: %d"), RecursivCounter);
+		return FVector::ZeroVector;
+	}
+
+	
+	if (RecursivCounter == 10)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Recursiv loop warning: %d"), RecursivCounter);
+		return FVector::ZeroVector;
+	}
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceStart = Origin;
@@ -111,14 +128,22 @@ FVector APlayerPawn::CollisionFunction(FVector Movement)
 	Params.AddIgnoredActor(this);
 	bool bHit = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeBox(Extent), Params);
+
+	//DrawDebugLine(GetWorld(), Origin, Movement, FColor::Green, false, 2);
 	if (bHit)
 	{
 		FVector NormalF = StaticHelperClass::DotProduct(Movement, Hit.Normal);
 		UE_LOG(LogTemp, Warning, TEXT("NormalF: %s"), *NormalF.ToString());
 		UE_LOG(LogTemp, Warning, TEXT("Movement: %s"), *Movement.ToString());
-		FVector FullMovement = Movement + NormalF;
-		UE_LOG(LogTemp, Warning, TEXT("FullMovement: %s"), *FullMovement.ToString());
-		return FullMovement;
-	}
+		Movement += NormalF;
+		UE_LOG(LogTemp, Warning, TEXT("FullMovement before: %s"), *Movement.ToString());
+		FVector AllowedMovement =  Movement.GetSafeNormal() * (Hit.Distance - SkinWidth);
+
+		//cant handle more than one collision 
+		
+		UE_LOG(LogTemp, Warning, TEXT("FullMovement after: %s"), *Movement.ToString());
+		CollisionFunction(AllowedMovement, ++RecursivCounter);
+	} 
+	RecursivCounter = 0;
 	return Movement;
 }

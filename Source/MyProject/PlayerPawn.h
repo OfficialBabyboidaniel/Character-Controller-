@@ -50,10 +50,14 @@ public:
 	float GravityForce = 500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float JumpForce = 100.0f;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float LowForce = 1.0f;
+	int RecursivCounter = 0;
+	
 	
 	FVector JumpMovement;	
 	
 	//functions
-	FVector CollisionFunction(FVector Movement);
+	FVector CollisionFunction(FVector Movement, int counter);
 	
 };
