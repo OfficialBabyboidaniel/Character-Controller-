@@ -49,7 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float GravityForce = 500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float JumpForce = 100.0f;
+	float JumpForce = 200.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float LowForce = 1.0f;
 	int RecursivCounter = 0;
