@@ -59,7 +59,7 @@ void APlayerPawn::Tick(float DeltaTime)
 
 	FVector ProcessedMovement = CollisionFunction(Velocity, RecursivCounter);
 	const FVector CurrentLocation = GetActorLocation();
-	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
+	//	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
 
 	SetActorLocation(CurrentLocation + ProcessedMovement);
 	JumpMovement = FVector::ZeroVector;
@@ -91,15 +91,17 @@ void APlayerPawn::VerticalInput(float AxisValue)
 
 // jump input
 void APlayerPawn::JumpInput()
+
 {
-	//collision check above aswell
+	// kolla igenom sen?
 
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
 	Params.AddIgnoredActor(this);
-	bool bHit = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
+	//använda get actor location? 
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, GetActorLocation(), TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeBox(Extent), Params);
 	if (bHit)
 	{
@@ -124,30 +126,41 @@ FVector APlayerPawn::CollisionFunction(FVector Movement, int counter)
 		ECC_Pawn,
 		FCollisionShape::MakeBox(Extent),
 		Params);
+
+	if(bHit)
+	{
+		FHitResult NormalHit;
+		TraceEnd = Origin - Hit.Normal * Hit.Distance;
+		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
+		                                        FCollisionShape::MakeBox(Extent), Params);
+		// should you set actor location on collision hit, prolly not? 
+		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth));
+	}
+	
 	if (Movement.Size() < 0.1)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
+		//	UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
+		RecursivCounter = 0;
 		return FVector::ZeroVector;
 	}
 
-	/*if (RecursivCounter > 10)
+	if (RecursivCounter > 10)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Processedmomvenet"));
+		RecursivCounter = 0;
 		return FVector::ZeroVector;
-	}*/
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Counter %d"), RecursivCounter);
 	if (bHit)
 	{
-		FVector test = StaticHelperClass::DotProduct(Movement, Hit.ImpactNormal) +
-			Movement /*Movement.GetSafeNormal() *
-			(Hit.Distance - SkinWidth)*/;
-		UE_LOG(LogTemp, Warning, TEXT("Collision Movement %s"), *Movement.ToString());
+		//		UE_LOG(LogTemp, Warning, TEXT("Collision Movement %s"), *Movement.ToString());
 
-		UE_LOG(LogTemp, Warning, TEXT("Processedmomvenet %s"), *test.ToString());
+		//		UE_LOG(LogTemp, Warning, TEXT("Processedmomvenet %s"), *test.ToString());
 
+		//behöver recursiv function parametrar öndras ifall vi gör två boxcasts och flyttar mot normalen av första träffpunkt
 		return CollisionFunction(StaticHelperClass::DotProduct(Movement, Hit.ImpactNormal) +
-		                         Movement /*Movement.GetSafeNormal() *
-			(Hit.Distance - SkinWidth)*/, ++RecursivCounter);
+		                         Movement + Movement.GetSafeNormal() *
+		                         (Hit.Distance - SkinWidth), ++RecursivCounter);
 	}
 	RecursivCounter = 0;
 	UE_LOG(LogTemp, Warning, TEXT("Final Movement %s"), *Movement.ToString());
