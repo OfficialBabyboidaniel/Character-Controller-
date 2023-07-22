@@ -1,90 +1,90 @@
 [
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProject.Build.cs",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProject.Build.cs",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProject.cpp",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProject.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProject.h",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProject.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectCharacter.cpp",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProjectCharacter.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectCharacter.h",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProjectCharacter.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectGameMode.cpp",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProjectGameMode.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\MyProjectGameMode.h",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\MyProjectGameMode.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\PlayerPawn.cpp",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\PlayerPawn.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\PlayerPawn.h",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\PlayerPawn.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\StaticHelperClass.cpp",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\StaticHelperClass.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\Source\\MyProject\\StaticHelperClass.h",
+		"file": "C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\Source\\MyProject\\StaticHelperClass.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.35.32215\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Daniel\\Documents\\Unreal Projects\\MyProject\\.vscode\\compileCommands_Default\\MyProject.255.rsp"
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\daol8481\\Documents\\GitHub\\Myproject\\.vscode\\compileCommands_Default\\MyProject.261.rsp"
 		],
-		"directory": "Z:\\Programs\\UE_5.1\\Engine\\Source"
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	}
 ]
