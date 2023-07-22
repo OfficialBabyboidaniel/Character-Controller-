@@ -55,9 +55,9 @@ void APlayerPawn::Tick(float DeltaTime)
 	const double Distance = MovementSpeed * DeltaTime;
 	FVector Gravity = FVector::DownVector * GravityForce * DeltaTime;
 	FVector InputMovement = CurrentInput * Distance;
-	FVector Velocity = InputMovement + Gravity + JumpMovement;
+	Velocity = InputMovement + Gravity + JumpMovement;
 
-	FVector ProcessedMovement = CollisionFunction(Velocity, RecursivCounter);
+	FVector ProcessedMovement = UpdateVelocity(Velocity, RecursivCounter);
 	const FVector CurrentLocation = GetActorLocation();
 	//	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
 
@@ -97,19 +97,19 @@ void APlayerPawn::JumpInput()
 
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
-	FVector TraceStart = Origin;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
 	Params.AddIgnoredActor(this);
 	//använda get actor location? 
-	bool bHit = GetWorld()->SweepSingleByChannel(Hit, GetActorLocation(), TraceEnd, FQuat::Identity, ECC_Pawn,
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeBox(Extent), Params);
 	if (bHit)
 	{
 		JumpMovement = FVector(0, 0, JumpForce);
 	}
+	
 }
 
-FVector APlayerPawn::CollisionFunction(FVector Movement, int counter)
+FVector APlayerPawn::UpdateVelocity(FVector Movement, int counter)
 {
 	RecursivCounter = counter;
 	GetActorBounds(true, Origin, Extent);
@@ -158,7 +158,7 @@ FVector APlayerPawn::CollisionFunction(FVector Movement, int counter)
 		//		UE_LOG(LogTemp, Warning, TEXT("Processedmomvenet %s"), *test.ToString());
 
 		//behöver recursiv function parametrar öndras ifall vi gör två boxcasts och flyttar mot normalen av första träffpunkt
-		return CollisionFunction(StaticHelperClass::DotProduct(Movement, Hit.ImpactNormal) +
+		return UpdateVelocity(StaticHelperClass::DotProduct(Movement, Hit.ImpactNormal) +
 		                         Movement + Movement.GetSafeNormal() *
 		                         (Hit.Distance - SkinWidth), ++RecursivCounter);
 	}
