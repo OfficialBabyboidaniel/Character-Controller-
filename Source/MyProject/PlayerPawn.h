@@ -34,9 +34,7 @@ public:
 
 	//Vectors values
 	FVector CurrentInput;
-	FVector Velocity;
-	FVector JumpMovement;	
-	
+
 	//Sweep values
 	FVector Origin, Extent;
 	FCollisionQueryParams Params;
@@ -57,8 +55,9 @@ public:
 	int RecursivCounter = 0;
 	
 	
+	FVector JumpMovement;	
 	
 	//functions
-	FVector UpdateVelocity(FVector Movement, int counter);
+	FVector CollisionFunction(FVector Movement, int counter);
 	
 };
