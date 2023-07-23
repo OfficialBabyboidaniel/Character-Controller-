@@ -49,24 +49,26 @@ void APlayerPawn::BeginPlay()
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	//DrawDebugBox(GetWorld(), Origin, Extent, FColor::Red, true);
+	Gravity = FVector::DownVector * GravityForce * DeltaTime;
 
-	const double Distance = MovementSpeed * DeltaTime;
-	FVector Gravity = FVector::DownVector * GravityForce * DeltaTime;
-	FVector InputMovement = CurrentInput * Distance;
-	Velocity = InputMovement + Gravity + JumpMovement;
+	// adderare jump innan eller efter calculation av input?
+	Velocity += Gravity + JumpMovement;
+	//calculera input.
+	CalculateInput(DeltaTime);
+	
+	// Velocity += InputMovement.GetSafeNormal() * Acceleration * DeltaTime + Gravity + JumpMovement;
 
-	FVector ProcessedMovement = UpdateVelocity(Velocity, RecursivCounter);
+	UpdateVelocity(DeltaTime);
+	// Y axis never used in 2D
+	Velocity.Y = 0;
+	UE_LOG(LogTemp, Warning, TEXT("Final Velocity before delta time %s"), *Velocity.ToString());
 	const FVector CurrentLocation = GetActorLocation();
-	//	UE_LOG(LogTemp, Warning, TEXT("ProcessedMovement: %s"), *ProcessedMovement.ToString());
-
-	SetActorLocation(CurrentLocation + ProcessedMovement);
+	SetActorLocation(CurrentLocation + Velocity * DeltaTime);
 	JumpMovement = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
-
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -91,10 +93,8 @@ void APlayerPawn::VerticalInput(float AxisValue)
 
 // jump input
 void APlayerPawn::JumpInput()
-
 {
 	// kolla igenom sen?
-
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
@@ -106,16 +106,15 @@ void APlayerPawn::JumpInput()
 	{
 		JumpMovement = FVector(0, 0, JumpForce);
 	}
-	
 }
 
-FVector APlayerPawn::UpdateVelocity(FVector Movement, int counter)
+void APlayerPawn::UpdateVelocity(float DeltaTime)
 {
-	RecursivCounter = counter;
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
+	FHitResult NormalHit;
 	FVector TraceStart = Origin;
-	FVector TraceEnd = Origin + Movement.GetSafeNormal() * (Movement.Size() + SkinWidth);
+	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * Velocity.Size() * DeltaTime + SkinWidth;
 	Params.AddIgnoredActor(this);
 	bool bHit;
 	bHit = GetWorld()->SweepSingleByChannel(
@@ -127,42 +126,93 @@ FVector APlayerPawn::UpdateVelocity(FVector Movement, int counter)
 		FCollisionShape::MakeBox(Extent),
 		Params);
 
-	if(bHit)
+	DrawDebugLine(
+		GetWorld(),
+		TraceStart,
+		TraceEnd,
+		FColor::Red, // Line color (you can change this to any color you like)
+		false, // Persistent (false means the line will disappear after one frame)
+		5.0f, // LifeTime (negative value means the line will stay forever)
+		0, // DepthPriority (you can adjust this if necessary)
+		2.0f // Thickness (you can adjust this to change the line's thickness)
+	);
+	if (bHit)
 	{
-		FHitResult NormalHit;
+		UE_LOG(LogTemp, Warning, TEXT("box cast hit  true"));
+
 		TraceEnd = Origin - Hit.Normal * Hit.Distance;
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
-		// should you set actor location on collision hit, prolly not? 
+		//flytta actor mto normalen av träffpunkten
 		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth));
 	}
-	
-	if (Movement.Size() < 0.1)
+
+	if (Velocity.Size() /** GetWorld()->DeltaTimeSeconds*/ < 0.1)
 	{
-		//	UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
+		UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
 		RecursivCounter = 0;
-		return FVector::ZeroVector;
+		//ska  det vara zero vector här?
+		Velocity = FVector::ZeroVector;
+		return;
 	}
+	//skiten crasher när man går ur focus. hela kollision bryts 
 
 	if (RecursivCounter > 10)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Processedmomvenet"));
+		UE_LOG(LogTemp, Warning, TEXT("Recursive counter 10"));
 		RecursivCounter = 0;
-		return FVector::ZeroVector;
+		Velocity = FVector::ZeroVector;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Counter %d"), RecursivCounter);
+	// UE_LOG(LogTemp, Warning, TEXT("Counter %d"), RecursivCounter);
 	if (bHit)
 	{
-		//		UE_LOG(LogTemp, Warning, TEXT("Collision Movement %s"), *Movement.ToString());
-
-		//		UE_LOG(LogTemp, Warning, TEXT("Processedmomvenet %s"), *test.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("2nd collision found, Collision Movement = %s"), *Velocity.ToString());
 
 		//behöver recursiv function parametrar öndras ifall vi gör två boxcasts och flyttar mot normalen av första träffpunkt
-		return UpdateVelocity(StaticHelperClass::DotProduct(Movement, Hit.ImpactNormal) +
-		                         Movement + Movement.GetSafeNormal() *
-		                         (Hit.Distance - SkinWidth), ++RecursivCounter);
+
+		//dubbel kolla normal kraft beräkning, det gungar ftf, kan ej vara helt still.  
+		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
+		UE_LOG(LogTemp, Warning, TEXT("Normal power %s"), *NormalPower.ToString());
+		Velocity += NormalPower /*+ NormalHit.ImpactNormal * SkinWidth*/;
+		UE_LOG(LogTemp, Warning, TEXT("velocity after added normal power %s"), *Velocity.ToString());
+		RecursivCounter++;
+		UpdateVelocity(DeltaTime);
 	}
 	RecursivCounter = 0;
-	UE_LOG(LogTemp, Warning, TEXT("Final Movement %s"), *Movement.ToString());
-	return Movement;
+}
+
+void APlayerPawn::CalculateInput(float DeltaTime)
+{
+	UE_LOG(LogTemp, Warning, TEXT("current input movement%s"), *CurrentInput.ToString());
+	if (CurrentInput.IsNearlyZero())
+	{
+		Decelerate(DeltaTime);
+	}
+	else
+	{
+		Accelerate(DeltaTime);
+	}
+}
+
+void APlayerPawn::Accelerate(float DeltaTime)
+{
+	// InputMovement =  CurrentInput * DeltaTime;
+	Velocity += CurrentInput.GetSafeNormal() * Acceleration * DeltaTime;
+	//Om velocity är större än maxspeed, sätt velocity till maxspeed.
+	UE_LOG(LogTemp, Warning, TEXT("Velocity accelerate %s"), *Velocity.ToString());
+	if (Velocity.Size() > MaxSpeed)
+	{
+		Velocity = Velocity.GetSafeNormal() * MaxSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("Velocity max speed %s"), *Velocity.ToString());
+	}
+}
+
+void APlayerPawn::Decelerate(float DeltaTime)
+{
+	FVector Projection = FVector(Velocity.X, 0.0f, 0.0f).GetSafeNormal();
+	if(Acceleration * DeltaTime > FMath::Abs(Velocity.X))
+	{
+		Velocity.X = 0;
+	} 
+	Velocity -= Projection * Acceleration * DeltaTime;
 }

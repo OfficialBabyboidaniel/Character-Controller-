@@ -23,9 +23,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UPROPERTY(EditAnywhere)
-	USceneComponent *OurVisibleComponent;
+	USceneComponent* OurVisibleComponent;
 
 	//Inputs
 	void HorizontalInput(float AxisValue);
@@ -34,8 +34,12 @@ public:
 
 	//Vectors values
 	FVector CurrentInput;
-	FVector Velocity;
-	FVector JumpMovement;	
+	FVector Velocity = FVector::ZeroVector;
+	FVector JumpMovement;
+	FVector Gravity;
+
+	//distance value
+	double Distance;
 	
 	//Sweep values
 	FVector Origin, Extent;
@@ -43,22 +47,24 @@ public:
 
 	//stats
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float MovementSpeed = 600.0f;
+	float Acceleration = 500.0f;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float MaxSpeed = 2500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float SkinWidth = 1.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 0.5f; 
+	float GroundCheckDistance = 0.5f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GravityForce = 500.0f;
+	float GravityForce = 300.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float JumpForce = 200.0f;
+	float JumpForce = 400.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float LowForce = 1.0f;
 	int RecursivCounter = 0;
-	
-	
-	
+
+
 	//functions
-	FVector UpdateVelocity(FVector Movement, int counter);
-	
+	void UpdateVelocity(float DeltaTime);
+	void Accelerate(float DeltaTime);
+	void Decelerate(float DeltaTime);
+	void CalculateInput(float DeltaTime);
 };
