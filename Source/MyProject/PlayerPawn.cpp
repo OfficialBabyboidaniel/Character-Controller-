@@ -183,36 +183,6 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 
 void APlayerPawn::CalculateInput(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("current input movement%s"), *CurrentInput.ToString());
-	if (CurrentInput.IsNearlyZero())
-	{
-		Decelerate(DeltaTime);
-	}
-	else
-	{
-		Accelerate(DeltaTime);
-	}
-}
-
-void APlayerPawn::Accelerate(float DeltaTime)
-{
-	// InputMovement =  CurrentInput * DeltaTime;
 	Velocity += CurrentInput.GetSafeNormal() * Acceleration * DeltaTime;
-	//Om velocity är större än maxspeed, sätt velocity till maxspeed.
-	UE_LOG(LogTemp, Warning, TEXT("Velocity accelerate %s"), *Velocity.ToString());
-	if (Velocity.Size() > MaxSpeed)
-	{
-		Velocity = Velocity.GetSafeNormal() * MaxSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Velocity max speed %s"), *Velocity.ToString());
-	}
-}
-
-void APlayerPawn::Decelerate(float DeltaTime)
-{
-	FVector Projection = FVector(Velocity.X, 0.0f, 0.0f).GetSafeNormal();
-	if(Acceleration * DeltaTime > FMath::Abs(Velocity.X))
-	{
-		Velocity.X = 0;
-	} 
-	Velocity -= Projection * Acceleration * DeltaTime;
+	
 }

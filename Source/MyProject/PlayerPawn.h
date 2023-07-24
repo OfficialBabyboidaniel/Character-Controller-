@@ -64,7 +64,5 @@ public:
 
 	//functions
 	void UpdateVelocity(float DeltaTime);
-	void Accelerate(float DeltaTime);
-	void Decelerate(float DeltaTime);
 	void CalculateInput(float DeltaTime);
 };
