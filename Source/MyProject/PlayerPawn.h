@@ -51,7 +51,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float MaxSpeed = 2500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float SkinWidth = 1.0f;
+	float SkinWidth = 1.2f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float GroundCheckDistance = 0.5f;
 	UPROPERTY(EditAnywhere, Category="Stats")
@@ -60,9 +60,18 @@ public:
 	float JumpForce = 400.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	int RecursivCounter = 0;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	double StaticFrictionCoefficient = 0.6;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	double KineticFrictionCoefficient  = 0.4;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	double  AirResistanceCoefficient  = 0.6;
 
 
 	//functions
 	void UpdateVelocity(float DeltaTime);
 	void CalculateInput(float DeltaTime);
+	// kanske behövs göras om till  vector value ist för float
+	void ApplyFriction(float DeltaTime, float NormalMagnitude);
 };
+

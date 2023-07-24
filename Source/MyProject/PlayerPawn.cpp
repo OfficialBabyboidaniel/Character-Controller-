@@ -52,16 +52,16 @@ void APlayerPawn::Tick(float DeltaTime)
 	//DrawDebugBox(GetWorld(), Origin, Extent, FColor::Red, true);
 	Gravity = FVector::DownVector * GravityForce * DeltaTime;
 
-	// adderare jump innan eller efter calculation av input?
+	//addera jump och gravity 
 	Velocity += Gravity + JumpMovement;
 	//calculera input.
 	CalculateInput(DeltaTime);
-	
-	// Velocity += InputMovement.GetSafeNormal() * Acceleration * DeltaTime + Gravity + JumpMovement;
-
+	//multiplicera med luftmotstånd
+	Velocity *=  FMath::Pow(AirResistanceCoefficient, DeltaTime);
 	UpdateVelocity(DeltaTime);
-	// Y axis never used in 2D
+	// Y axis alltid noll för att stanna i 2D. 
 	Velocity.Y = 0;
+	
 	UE_LOG(LogTemp, Warning, TEXT("Final Velocity before delta time %s"), *Velocity.ToString());
 	const FVector CurrentLocation = GetActorLocation();
 	SetActorLocation(CurrentLocation + Velocity * DeltaTime);
@@ -155,7 +155,6 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		Velocity = FVector::ZeroVector;
 		return;
 	}
-	//skiten crasher när man går ur focus. hela kollision bryts 
 
 	if (RecursivCounter > 10)
 	{
@@ -168,14 +167,17 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("2nd collision found, Collision Movement = %s"), *Velocity.ToString());
 
-		//behöver recursiv function parametrar öndras ifall vi gör två boxcasts och flyttar mot normalen av första träffpunkt
-
 		//dubbel kolla normal kraft beräkning, det gungar ftf, kan ej vara helt still.  
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
+		//skriva kod här
+
+
 		UE_LOG(LogTemp, Warning, TEXT("Normal power %s"), *NormalPower.ToString());
 		Velocity += NormalPower /*+ NormalHit.ImpactNormal * SkinWidth*/;
 		UE_LOG(LogTemp, Warning, TEXT("velocity after added normal power %s"), *Velocity.ToString());
 		RecursivCounter++;
+		
+		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
 	}
 	RecursivCounter = 0;
@@ -184,5 +186,22 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 void APlayerPawn::CalculateInput(float DeltaTime)
 {
 	Velocity += CurrentInput.GetSafeNormal() * Acceleration * DeltaTime;
-	
 }
+
+void APlayerPawn::ApplyFriction(float DeltaTime, float NormalMagnitude)
+{
+	if (Velocity.Size() <
+		NormalMagnitude * StaticFrictionCoefficient)
+	{
+		Velocity = FVector::ZeroVector;
+	}
+	else
+	{
+		Velocity -= Velocity.GetSafeNormal() * NormalMagnitude *
+			KineticFrictionCoefficient;
+	}
+}
+
+
+// char fastnar i väggar ifall vi har för hög fart när vi kolliderar.
+// studsar ftf mot marken (vibrerar) någon värde calculering är fel. 
