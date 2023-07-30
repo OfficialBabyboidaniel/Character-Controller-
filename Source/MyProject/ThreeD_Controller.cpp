@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ThreeD_Controller.h"
@@ -66,7 +66,7 @@ void AThreeD_Controller::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	// bind inputs
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AThreeD_Controller::JumpInput);
 	PlayerInputComponent->BindAxis("X", this, &AThreeD_Controller::XInput);
-	PlayerInputComponent->BindAxis("Y", this, &AThreeD_Controller::XInput);
+	PlayerInputComponent->BindAxis("Y", this, &AThreeD_Controller::YInput);
 	PlayerInputComponent->BindAxis("LookRight", this, &AThreeD_Controller::LookRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &AThreeD_Controller::LookUp);
 }

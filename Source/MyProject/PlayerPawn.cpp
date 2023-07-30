@@ -57,11 +57,11 @@ void APlayerPawn::Tick(float DeltaTime)
 	//calculera input.
 	CalculateInput(DeltaTime);
 	//multiplicera med luftmotstånd
-	Velocity *=  FMath::Pow(AirResistanceCoefficient, DeltaTime);
+	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 	UpdateVelocity(DeltaTime);
 	// Y axis alltid noll för att stanna i 2D. 
 	Velocity.Y = 0;
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("Final Velocity before delta time %s"), *Velocity.ToString());
 	const FVector CurrentLocation = GetActorLocation();
 	SetActorLocation(CurrentLocation + Velocity * DeltaTime);
@@ -72,7 +72,6 @@ void APlayerPawn::Tick(float DeltaTime)
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 	// bind inputs
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerPawn::JumpInput);
 	PlayerInputComponent->BindAxis("Vertical", this, &APlayerPawn::VerticalInput);
@@ -94,12 +93,10 @@ void APlayerPawn::VerticalInput(float AxisValue)
 // jump input
 void APlayerPawn::JumpInput()
 {
-	// kolla igenom sen?
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
 	Params.AddIgnoredActor(this);
-	//använda get actor location? 
 	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeBox(Extent), Params);
 	if (bHit)
@@ -114,7 +111,7 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	FHitResult Hit;
 	FHitResult NormalHit;
 	FVector TraceStart = Origin;
-	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * Velocity.Size() * DeltaTime + SkinWidth;
+	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime; 
 	Params.AddIgnoredActor(this);
 	bool bHit;
 	bHit = GetWorld()->SweepSingleByChannel(
@@ -126,6 +123,7 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		FCollisionShape::MakeBox(Extent),
 		Params);
 
+	// ta bort sen
 	DrawDebugLine(
 		GetWorld(),
 		TraceStart,
@@ -143,40 +141,31 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		TraceEnd = Origin - Hit.Normal * Hit.Distance;
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
-		//flytta actor mto normalen av träffpunkten
 		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth));
 	}
-
-	if (Velocity.Size() /** GetWorld()->DeltaTimeSeconds*/ < 0.1)
+	if (Velocity.Size() < 0.1)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
 		RecursivCounter = 0;
-		//ska  det vara zero vector här?
 		Velocity = FVector::ZeroVector;
 		return;
 	}
-
 	if (RecursivCounter > 10)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Recursive counter 10"));
 		RecursivCounter = 0;
 		Velocity = FVector::ZeroVector;
+		return;
 	}
-	// UE_LOG(LogTemp, Warning, TEXT("Counter %d"), RecursivCounter);
 	if (bHit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("2nd collision found, Collision Movement = %s"), *Velocity.ToString());
-
-		//dubbel kolla normal kraft beräkning, det gungar ftf, kan ej vara helt still.  
+		UE_LOG(LogTemp, Warning, TEXT("Recursive counter %d"), RecursivCounter);
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
-		//skriva kod här
-
-
 		UE_LOG(LogTemp, Warning, TEXT("Normal power %s"), *NormalPower.ToString());
-		Velocity += NormalPower /*+ NormalHit.ImpactNormal * SkinWidth*/;
+		Velocity += NormalPower;
 		UE_LOG(LogTemp, Warning, TEXT("velocity after added normal power %s"), *Velocity.ToString());
 		RecursivCounter++;
-		
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
 	}

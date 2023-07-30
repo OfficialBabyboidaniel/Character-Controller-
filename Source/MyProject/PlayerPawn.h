@@ -74,4 +74,3 @@ public:
 	// kanske behövs göras om till  vector value ist för float
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
 };
-
