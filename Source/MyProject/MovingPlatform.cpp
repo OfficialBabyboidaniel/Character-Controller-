@@ -1,42 +1,32 @@
 #include "MovingPlatform.h"
 
-// Sets default values
+#include "BehaviorTree/BehaviorTree.h"
+
+
 AMovingPlatform::AMovingPlatform()
 {
-	// Set this actor to call Tick() every frame
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called when the game starts or when spawned
 void AMovingPlatform::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GlobalStartLocation = GetActorLocation();
-	GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation);
+	StartLocation = GetActorLocation();
+
+	if(PathActors.Num() > 0 && BehaviorTree != nullptr && BlackboardComponent != nullptr )
+	{
+		IsEmpty = false;
+	}
+	
 }
 
-// Called every frame
 void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Ensure the platform moves only if a target location is set
-	if (HasAuthority())
+	if(!IsEmpty)
 	{
-		FVector CurrentLocation = GetActorLocation();
-		FVector Direction = (GlobalTargetLocation - GlobalStartLocation).GetSafeNormal();
-		float TravelDistance = (GlobalTargetLocation - GlobalStartLocation).Size();
-		float TravelDelta = Speed * DeltaTime;
-
-		if ((CurrentLocation - GlobalStartLocation).Size() >= TravelDistance)
-		{
-			// Swap start and target locations to move the platform back and forth
-			FVector Temp = GlobalStartLocation;
-			GlobalStartLocation = GlobalTargetLocation;
-			GlobalTargetLocation = Temp;
-		}
-
-		SetActorLocation(CurrentLocation + Direction * TravelDelta);
+		//BlackboardComponent->SetValueAsVector("PathLocation", PathActors[0]->GetActorLocation());
 	}
 }
