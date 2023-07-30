@@ -32,9 +32,9 @@ public:
 	float Speed = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Moving Platform")
-	class UBehaviorTree* BehaviorTree; // Placeholder for Behavior Tree asset
+	class UBehaviorTree* BehaviorTree = nullptr; // Placeholder for Behavior Tree asset
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Moving Platform")
-	class UBlackboardComponent* BlackboardComponent;
+	class UBlackboardComponent* BlackboardComponent = nullptr;
 	
 private:
 	FVector StartLocation;

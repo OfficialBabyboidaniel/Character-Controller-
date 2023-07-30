@@ -1,6 +1,8 @@
 #include "MovingPlatform.h"
-
 #include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
 
 
 AMovingPlatform::AMovingPlatform()
@@ -14,10 +16,10 @@ void AMovingPlatform::BeginPlay()
 
 	StartLocation = GetActorLocation();
 
-	if(PathActors.Num() > 0 && BehaviorTree != nullptr && BlackboardComponent != nullptr )
+	/*if(PathActors.Num() > 0 && BehaviorTree != nullptr && BlackboardComponent != nullptr )
 	{
 		IsEmpty = false;
-	}
+	}*/
 	
 }
 
