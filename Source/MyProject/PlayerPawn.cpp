@@ -61,8 +61,6 @@ void APlayerPawn::Tick(float DeltaTime)
 	UpdateVelocity(DeltaTime);
 	// Y axis alltid noll för att stanna i 2D. 
 	Velocity.Y = 0;
-
-	UE_LOG(LogTemp, Warning, TEXT("Final Velocity before delta time %s"), *Velocity.ToString());
 	const FVector CurrentLocation = GetActorLocation();
 	SetActorLocation(CurrentLocation + Velocity * DeltaTime);
 	JumpMovement = FVector::ZeroVector;
@@ -111,7 +109,7 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	FHitResult Hit;
 	FHitResult NormalHit;
 	FVector TraceStart = Origin;
-	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime; 
+	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
 	Params.AddIgnoredActor(this);
 	bool bHit;
 	bHit = GetWorld()->SweepSingleByChannel(
@@ -136,35 +134,45 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	);
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("box cast hit  true"));
-
 		TraceEnd = Origin - Hit.Normal * Hit.Distance;
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
 		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth));
 	}
-	if (Velocity.Size() < 0.1)
+
+	if (Velocity.Size() < 0.1 && Hit.GetActor() != nullptr && Hit.GetActor()->GetVelocity().Size() < 0.1)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
 		RecursivCounter = 0;
 		Velocity = FVector::ZeroVector;
-		return;
 	}
 	if (RecursivCounter > 10)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Recursive counter 10"));
 		RecursivCounter = 0;
 		Velocity = FVector::ZeroVector;
-		return;
 	}
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("2nd collision found, Collision Movement = %s"), *Velocity.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Recursive counter %d"), RecursivCounter);
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
-		UE_LOG(LogTemp, Warning, TEXT("Normal power %s"), *NormalPower.ToString());
 		Velocity += NormalPower;
-		UE_LOG(LogTemp, Warning, TEXT("velocity after added normal power %s"), *Velocity.ToString());
+
+		FVector GroundMovement = Hit.GetActor()->GetVelocity();
+		UE_LOG(LogTemp, Warning, TEXT("Ground Movement = %s"), *GroundMovement.ToString());
+
+		if (GroundMovement.Size() > 0.1)
+		{
+			FVector FriktionPower = FVector::ZeroVector;
+			FriktionPower.X = Velocity.X - GroundMovement.X;
+			UE_LOG(LogTemp, Warning, TEXT("Friktion before added normal Power= %s"), *FriktionPower.ToString());
+			FVector NormalPowerr = StaticHelperClass::DotProduct(FriktionPower, FriktionPower.GetSafeNormal());
+			FriktionPower += NormalPowerr;
+			UE_LOG(LogTemp, Warning, TEXT("Friktion Power after added normal power= %s"), *FriktionPower.ToString());
+			float Difference = GroundMovement.Size() - FriktionPower.Size();
+
+			if (Difference < 0.6)
+			{
+				Velocity = GroundMovement;
+			}
+		}
 		RecursivCounter++;
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
