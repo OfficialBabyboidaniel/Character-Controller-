@@ -24,21 +24,6 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Moving Platform")
-	TArray<AActor*> PathActors; // Array of actors representing the path
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Moving Platform")
-	float Speed = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Moving Platform")
-	class UBehaviorTree* BehaviorTree = nullptr; // Placeholder for Behavior Tree asset
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Moving Platform")
-	class UBlackboardComponent* BlackboardComponent = nullptr;
-	
-private:
-	FVector StartLocation;
-	FVector PathLocation;
-	bool IsEmpty = true; 
+		
 };
 
