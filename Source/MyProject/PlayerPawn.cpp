@@ -157,8 +157,8 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 
 		FVector GroundMovement = Hit.GetActor()->GetVelocity();
 		UE_LOG(LogTemp, Warning, TEXT("Ground Movement = %s"), *GroundMovement.ToString());
-
-		if (GroundMovement.Size() > 0.1)
+		
+		/*if (GroundMovement.Size() > 0.1)
 		{
 			FVector FriktionPower = FVector::ZeroVector;
 			FriktionPower.X = Velocity.X - GroundMovement.X;
@@ -166,13 +166,14 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 			FVector NormalPowerr = StaticHelperClass::DotProduct(FriktionPower, FriktionPower.GetSafeNormal());
 			FriktionPower += NormalPowerr;
 			UE_LOG(LogTemp, Warning, TEXT("Friktion Power after added normal power= %s"), *FriktionPower.ToString());
+			
 			float Difference = GroundMovement.Size() - FriktionPower.Size();
 
 			if (Difference < 0.6)
 			{
 				Velocity = GroundMovement;
 			}
-		}
+		}*/
 		RecursivCounter++;
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
