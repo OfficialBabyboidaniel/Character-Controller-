@@ -1,4 +1,4 @@
- // Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ThreeD_Controller.h"
@@ -52,7 +52,6 @@ void AThreeD_Controller::Tick(float DeltaTime)
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 	UpdateVelocity(DeltaTime);
 
-	UE_LOG(LogTemp, Warning, TEXT("Final Velocity before delta time %s"), *Velocity.ToString());
 	const FVector CurrentLocation = GetActorLocation();
 	SetActorLocation(CurrentLocation + Velocity * DeltaTime);
 	JumpMovement = FVector::ZeroVector;
@@ -70,26 +69,78 @@ void AThreeD_Controller::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis("LookRight", this, &AThreeD_Controller::LookRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &AThreeD_Controller::LookUp);
 }
-
+// watch a real tutorial 
 void AThreeD_Controller::XInput(float AxisValue)
 {
-	CurrentInput = FVector(CurrentInput.X, AxisValue, AxisValue);
+	/*// Ensure that the player controller is valid
+	if (APlayerController* MyController = GetController<APlayerController>())
+	{
+		// Get the camera manager from the player controller
+		APlayerCameraManager* CameraManager = MyController->PlayerCameraManager;
+
+		if (CameraManager)
+		{
+			// Get the camera's forward vector (the direction it is facing)
+			FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+
+			// Flatten the camera's forward vector, so we ignore the Z (up/down) component
+			CameraForward.Z = 0.0f;
+			CameraForward.Normalize();
+
+			FVector CameraRight = CameraForward.RotateAngleAxis(180.0f, FVector::UpVector);
+
+			// Set the forward movement direction based on the camera's forward vector
+			FVector ForwardDirection = CameraRight * AxisValue;
+
+			// Update the input vector
+			CurrentInput = FVector(AxisValue, CurrentInput.Y, CurrentInput.Z);
+		}
+	}
+	CurrentInput = FVector(AxisValue, CurrentInput.Y, CurrentInput.Z);*/
 }
+
 
 // vertical axis input
 void AThreeD_Controller::YInput(float AxisValue)
 {
-	CurrentInput = FVector(AxisValue, CurrentInput.Y, AxisValue);
+	/*if (APlayerController* MyController = GetController<APlayerController>())
+	{
+		// Get the camera manager from the player controller
+		APlayerCameraManager* CameraManager = MyController->PlayerCameraManager;
+
+		if (CameraManager)
+		{
+			// Get the camera's forward vector (the direction it is facing)
+			FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+
+			// Flatten the camera's forward vector, so we ignore the Z (up/down) component
+			CameraForward.Z = 0.0f;
+			CameraForward.Normalize();
+
+			// Get the camera's right vector (the direction perpendicular to forward)
+			FVector CameraRight = CameraForward.RotateAngleAxis(90.0f, FVector::UpVector);
+
+			// Set the rightward movement direction based on the camera's right vector
+			FVector RightDirection = CameraRight * AxisValue;
+
+			// Update the input vector
+			CurrentInput = FVector(RightDirection.X, RightDirection.Y, CurrentInput.Z);
+		}
+	}*/
+	// Ensure that the player controller is valid
 }
+
 
 void AThreeD_Controller::LookRight(float AxisValue)
 {
-	AddControllerYawInput(AxisValue * RotationSpeed);
+	UE_LOG(LogTemp, Warning, TEXT("Tryin to look rihgt"));
+	AddControllerYawInput(AxisValue * RotationSpeed * GetWorld()->GetDeltaSeconds());
 }
 
 void AThreeD_Controller::LookUp(float AxisValue)
 {
-	AddControllerPitchInput(AxisValue * RotationSpeed);
+	UE_LOG(LogTemp, Warning, TEXT("Tryin to look up"));
+	AddControllerPitchInput(AxisValue * RotationSpeed * GetWorld()->GetDeltaSeconds());
 }
 
 
@@ -141,8 +192,6 @@ void AThreeD_Controller::UpdateVelocity(float DeltaTime)
 	);
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("box cast hit  true"));
-
 		TraceEnd = Origin - Hit.Normal * Hit.Distance;
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
@@ -152,7 +201,6 @@ void AThreeD_Controller::UpdateVelocity(float DeltaTime)
 
 	if (Velocity.Size() /** GetWorld()->DeltaTimeSeconds*/ < 0.1)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Movement too small, returning zero vector."));
 		RecursivCounter = 0;
 		//ska  det vara zero vector här?
 		Velocity = FVector::ZeroVector;
@@ -168,16 +216,13 @@ void AThreeD_Controller::UpdateVelocity(float DeltaTime)
 	// UE_LOG(LogTemp, Warning, TEXT("Counter %d"), RecursivCounter);
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("2nd collision found, Collision Movement = %s"), *Velocity.ToString());
-
 		//dubbel kolla normal kraft beräkning, det gungar ftf, kan ej vara helt still.  
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
 		//skriva kod här
 
 
-		UE_LOG(LogTemp, Warning, TEXT("Normal power %s"), *NormalPower.ToString());
 		Velocity += NormalPower /*+ NormalHit.ImpactNormal * SkinWidth*/;
-		UE_LOG(LogTemp, Warning, TEXT("velocity after added normal power %s"), *Velocity.ToString());
+
 		RecursivCounter++;
 
 		ApplyFriction(DeltaTime, NormalPower.Size());

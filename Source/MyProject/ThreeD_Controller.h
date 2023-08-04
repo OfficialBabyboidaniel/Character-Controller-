@@ -58,7 +58,7 @@ public:
 
 	//stats
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float RotationSpeed = 30.0f;
+	float RotationSpeed = 25.0f;
 	
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float Acceleration = 500.0f;
