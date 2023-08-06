@@ -53,7 +53,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float SkinWidth = 1.2f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 0.5f;
+	float GroundCheckDistance = 1.5f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float GravityForce = 300.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
@@ -71,6 +71,5 @@ public:
 	//functions
 	void UpdateVelocity(float DeltaTime);
 	void CalculateInput(float DeltaTime);
-	// kanske behövs göras om till  vector value ist för float
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
 };

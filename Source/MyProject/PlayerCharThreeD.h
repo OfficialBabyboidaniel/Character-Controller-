@@ -3,45 +3,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
-#include "ThreeD_Controller.generated.h"
+#include "GameFramework/Character.h"
+#include "PlayerCharThreeD.generated.h"
 
 UCLASS()
-class MYPROJECT_API AThreeD_Controller : public APawn
+class MYPROJECT_API APlayerCharThreeD : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	AThreeD_Controller();
+	// Sets default values for this character's properties
+	APlayerCharThreeD();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	UPROPERTY(EditAnywhere)
-	USceneComponent* OurVisibleComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	class USpringArmComponent* CameraBoom;
-
-	// The main camera component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	class UCameraComponent* CameraComponent;
-	
+private:
 
 	void XInput(float AxisValue);
 	void YInput(float AxisValue);
 	void JumpInput();
 	void LookRight(float AxisValue);
 	void LookUp(float AxisValue);
-
 	
 	//Vectors values
 	FVector CurrentInput;
@@ -49,17 +40,25 @@ public:
 	FVector JumpMovement;
 	FVector Gravity;
 
+	//camera values
+	UPROPERTY(EditAnywhere, Category="Stats")
+	double MouseSensitivity = 20;
+	double YawAxisValue;
+	double PitchAxisValue;
+	FVector CameraInput = FVector::ZeroVector;
+	
 	//distance value
 	double Distance;
-	
+
 	//Sweep values
 	FVector Origin, Extent;
 	FCollisionQueryParams Params;
 
 	//stats
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float RotationSpeed = 25.0f;
 	
+	UPROPERTY(EditAnywhere, Category="Stats") // ta bort sen
+	float RotationSpeed = 25.0f;
+
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float Acceleration = 500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
@@ -67,7 +66,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float SkinWidth = 1.2f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 0.5f;
+	float GroundCheckDistance = 1.5f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float GravityForce = 300.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
@@ -77,9 +76,9 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	double StaticFrictionCoefficient = 0.6;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	double KineticFrictionCoefficient  = 0.4;
+	double KineticFrictionCoefficient = 0.4;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	double  AirResistanceCoefficient  = 0.6;
+	double AirResistanceCoefficient = 0.6;
 
 
 	//functions
@@ -87,4 +86,5 @@ public:
 	void CalculateInput(float DeltaTime);
 	// kanske behövs göras om till  vector value ist för float
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
-};
+	
+};                      

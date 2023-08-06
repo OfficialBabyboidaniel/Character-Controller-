@@ -4,7 +4,7 @@
 
 FVector StaticHelperClass::DotProduct(FVector Velocity, FVector Normal)
 {
-	float DotProduct = FVector::DotProduct(Velocity, Normal);
+	double DotProduct = FVector::DotProduct(Velocity, Normal);
 	if (DotProduct > 0) DotProduct = 0;
 	return -(DotProduct * Normal);
 }

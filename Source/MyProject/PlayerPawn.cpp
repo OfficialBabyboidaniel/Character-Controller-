@@ -49,7 +49,6 @@ void APlayerPawn::BeginPlay()
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//DrawDebugBox(GetWorld(), Origin, Extent, FColor::Red, true);
 	Gravity = FVector::DownVector * GravityForce * DeltaTime;
 
 	//addera jump och gravity 
@@ -57,12 +56,32 @@ void APlayerPawn::Tick(float DeltaTime)
 	//calculera input.
 	CalculateInput(DeltaTime);
 	//multiplicera med luftmotstånd
+	
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
+
+	// Get the current time before calling UpdateVelocity
+	const double StartTime = FPlatformTime::Seconds();
+
+	// Call the UpdateVelocity function
 	UpdateVelocity(DeltaTime);
-	// Y axis alltid noll för att stanna i 2D. 
+
+	// Get the current time after UpdateVelocity has finished
+	const double EndTime = FPlatformTime::Seconds();
+
+	// Calculate the time taken by UpdateVelocity
+	const double TimeTaken = EndTime - StartTime;
+
+	// Subtract the time taken by UpdateVelocity from DeltaTime
+	const float AdjustedDeltaTime = FMath::Max(DeltaTime - TimeTaken, 0.0f);
+	
+	// Y axis zero to stay in 2D.
 	Velocity.Y = 0;
+	if (Velocity.Size() > MaxSpeed)
+	{
+		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
+	}
 	const FVector CurrentLocation = GetActorLocation();
-	SetActorLocation(CurrentLocation + Velocity * DeltaTime);
+	SetActorLocation(CurrentLocation + Velocity * AdjustedDeltaTime);
 	JumpMovement = FVector::ZeroVector;
 }
 
@@ -109,7 +128,7 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	FHitResult Hit;
 	FHitResult NormalHit;
 	FVector TraceStart = Origin;
-	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
+	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime; // ska delta tid vara här? 
 	Params.AddIgnoredActor(this);
 	bool bHit;
 	bHit = GetWorld()->SweepSingleByChannel(
@@ -134,10 +153,10 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	);
 	if (bHit)
 	{
-		TraceEnd = Origin - Hit.Normal * Hit.Distance;
+		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth);
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
-		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth));
+		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
 	}
 
 	if (Velocity.Size() < 0.1 && Hit.GetActor() != nullptr && Hit.GetActor()->GetVelocity().Size() < 0.1)
@@ -154,7 +173,6 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	{
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
 		Velocity += NormalPower;
-
 
 		FVector GroundMovement = Hit.GetActor()->GetVelocity();
 		if (GroundMovement.Size() > 0.1)
@@ -195,6 +213,4 @@ void APlayerPawn::ApplyFriction(float DeltaTime, float NormalMagnitude)
 	}
 }
 
-
-// char fastnar i väggar ifall vi har för hög fart när vi kolliderar.
-// studsar ftf mot marken (vibrerar) någon värde calculering är fel. 
+ 
