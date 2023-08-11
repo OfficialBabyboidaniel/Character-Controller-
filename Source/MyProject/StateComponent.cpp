@@ -3,6 +3,8 @@
 
 #include "StateComponent.h"
 
+#include "StateMachineComponent.h"
+
 // Sets default values for this component's properties
 UStateComponent::UStateComponent()
 {
@@ -10,6 +12,7 @@ UStateComponent::UStateComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	StateMachineRef = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine"));
 	// ...
 }
 
@@ -19,8 +22,8 @@ void UStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	/*StateMachineRef.States.Add(this);*/
+	StateMachineRef->States.Add(this);
 }
 
 
@@ -32,3 +35,14 @@ void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
+void UStateComponent::Enter()
+{
+}
+
+void UStateComponent::Update()
+{
+}
+
+void UStateComponent::Exit()
+{
+}

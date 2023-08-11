@@ -32,3 +32,8 @@ void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
+void UStateMachineComponent::ChangeState(StateComponent* State)
+{
+	
+}
+

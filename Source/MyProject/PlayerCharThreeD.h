@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "State.h"
+#include "StateComponent.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharThreeD.generated.h"
 
@@ -46,9 +46,9 @@ private:
 	UPROPERTY(EditAnywhere, Category="Camera Stats")
 	double MouseSensitivity = 2;
 	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	double MaxPitchRotaion = 70;
+	double MaxPitchRotaion = 30;
 	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	double MinPitchRotation = -30;
+	double MinPitchRotation = -50;
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	FQuat CameraRotation;
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
@@ -67,7 +67,8 @@ private:
 	double PitchAxisValue;
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	double OffsetDistance;
-
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double CameraSkinWidth = 5;
 
 	//Sweep values
 	FVector Origin, Extent;
@@ -104,4 +105,11 @@ private:
 	void CalculateInput(float DeltaTime);
 	// kanske behövs göras om till  vector value ist för float
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
+
+
+	//help functions
+	void CalculatePitchInput();
+	void SetInitialCameraLocation(float DeltaTime);
+	void CameraCollisionCheck();
+	
 };

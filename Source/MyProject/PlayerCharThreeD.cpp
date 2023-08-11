@@ -34,11 +34,14 @@ void APlayerCharThreeD::BeginPlay()
 	Super::BeginPlay();
 	Camera = FindComponentByClass<UCameraComponent>();
 	if (Camera)
+	{
 		CameraLocationRelativeToPlayer = Camera->GetComponentLocation();
-
-	
-	OffsetDistance = FVector::Distance(GetActorLocation(), CameraLocationRelativeToPlayer);
+		// get distance between player and camera
+		OffsetDistance = FVector::Distance(GetActorLocation(), CameraLocationRelativeToPlayer);
+	}
+	Params.AddIgnoredActor(this);
 }
+
 
 // Called every frame
 void APlayerCharThreeD::Tick(float DeltaTime)
@@ -47,14 +50,11 @@ void APlayerCharThreeD::Tick(float DeltaTime)
 
 	//camera rotaion
 	CameraRotation = FQuat::MakeFromEuler(CameraInput);
-	
+
 	if (Camera)
 	{
-		CameraRotation *= DeltaTime;
-		Camera->SetRelativeRotation(CameraRotation);
-		FVector OffsetDirection = -Camera->GetRelativeRotation().Quaternion().GetForwardVector();
-		OffsetDirection *= OffsetDistance;
-		Camera->SetRelativeLocation(OffsetDirection);
+		SetInitialCameraLocation(DeltaTime);
+		CameraCollisionCheck();
 	}
 
 	Gravity = FVector::DownVector * GravityForce * DeltaTime;
@@ -135,15 +135,7 @@ void APlayerCharThreeD::LookUp(float AxisValue)
 {
 	PitchAxisValue = AxisValue;
 	CameraInput.Y += PitchAxisValue * MouseSensitivity;
-	CameraRotation = FQuat::MakeFromEuler(CameraInput);
-	EulerRotation = CameraRotation.Euler();
-	if (EulerRotation.Y > MaxPitchRotaion || EulerRotation.Y < MinPitchRotation)
-	{
-		EulerRotation.Y = FMath::Clamp(EulerRotation.Y, MinPitchRotation, MaxPitchRotaion);
-		// ta bort värde så att den inte adderas i oändligthet (vilket slutligen resulterar i en 180* spin på camera) 
-		CameraInput.Y -= PitchAxisValue * MouseSensitivity;
-		CameraRotation.Y = EulerRotation.Y;
-	}
+	CalculatePitchInput();
 }
 
 
@@ -154,7 +146,7 @@ void APlayerCharThreeD::JumpInput()
 
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
-	Params.AddIgnoredActor(this);
+
 	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeCapsule(Extent), Params);
 	if (bHit)
@@ -175,7 +167,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 	UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector: X=%f, Y=%f, Z=%f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
 	UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector size: %f"), TraceEnd.Size());
 	TArray<FOverlapResult> OverlapResult;
-	Params.AddIgnoredActor(this);
+
 
 	bool bHit = false;
 	bool bHit2 = false;
@@ -302,7 +294,7 @@ void APlayerCharThreeD::CalculateInput(float DeltaTime)
 	GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
-	Params.AddIgnoredActor(this);
+
 	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeCapsule(Extent), Params);
 	if (bHit)
@@ -326,5 +318,51 @@ void APlayerCharThreeD::ApplyFriction(float DeltaTime, float NormalMagnitude)
 	{
 		Velocity -= Velocity.GetSafeNormal() * NormalMagnitude *
 			KineticFrictionCoefficient;
+	}
+}
+
+//helper functions
+
+//Camera
+void APlayerCharThreeD::CalculatePitchInput()
+{
+	CameraRotation = FQuat::MakeFromEuler(CameraInput);
+	EulerRotation = CameraRotation.Euler();
+	//clamp pitch value if reached max/min rotaion
+	if (EulerRotation.Y > MaxPitchRotaion || EulerRotation.Y < MinPitchRotation)
+	{
+		EulerRotation.Y = FMath::Clamp(EulerRotation.Y, MinPitchRotation, MaxPitchRotaion);
+		//remove value so it does not add to the input forever, prevents a 180* spin 
+		CameraInput.Y -= PitchAxisValue * MouseSensitivity;
+		CameraRotation.Y = EulerRotation.Y;
+	}
+}
+
+void APlayerCharThreeD::SetInitialCameraLocation(float DeltaTime)
+{
+	CameraRotation *= DeltaTime;
+	Camera->SetRelativeRotation(CameraRotation);
+	FVector OffsetDirection = -Camera->GetRelativeRotation().Quaternion().GetForwardVector();
+	OffsetDirection *= OffsetDistance;
+	Camera->SetRelativeLocation(OffsetDirection);
+}
+
+void APlayerCharThreeD::CameraCollisionCheck()
+{
+	FHitResult CameraHit;
+	GetActorBounds(true, Origin, Extent);
+	FVector TraceStart = Origin;
+	FVector TraceEnd = Camera->GetComponentLocation();
+	UE_LOG(LogTemp, Warning, TEXT("TraceEnd Size: %f"), TraceEnd.Size());
+	UE_LOG(LogTemp, Warning, TEXT("OffsetDirection Size: %f"), OffsetDistance);
+	bool CameraSweep = GetWorld()->SweepSingleByChannel(CameraHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
+														FCollisionShape::MakeSphere(CameraSkinWidth * 2), Params);
+	if (CameraSweep)
+	{
+		FVector NewOffsetDirection = -Camera->GetRelativeRotation().Quaternion().GetForwardVector();
+		Camera->SetRelativeLocation(NewOffsetDirection *= (CameraHit.Distance - CameraSkinWidth));
+		FColor TraceColor = CameraHit.bBlockingHit ? FColor::Red : FColor::Green;
+		FVector HitLocation = CameraHit.ImpactPoint;
+		DrawDebugSphere(GetWorld(), HitLocation, 10, 12, TraceColor, false, 1.0f);
 	}
 }

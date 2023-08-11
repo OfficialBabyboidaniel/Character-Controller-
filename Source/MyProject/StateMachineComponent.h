@@ -24,5 +24,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	TArray<class UStateComponent*> States;
+
+	void ChangeState(class StateComponent* State);
+
+	
 };
