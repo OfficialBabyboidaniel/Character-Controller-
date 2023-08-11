@@ -9,12 +9,14 @@
 #include "Styling/StyleColors.h"
 #include "Util/ColorConstants.h"
 #include "DrawDebugHelpers.h"
+#include "Quaternion.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h" // Include the SpringArmComponent header
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PrimitiveComponent.h"
+#include "Math/UnrealMathUtility.h"
 //#include "Camera/Component.h"
 
 // Sets default values
@@ -30,48 +32,70 @@ APlayerCharThreeD::APlayerCharThreeD()
 void APlayerCharThreeD::BeginPlay()
 {
 	Super::BeginPlay();
+	Camera = FindComponentByClass<UCameraComponent>();
+	if (Camera)
+		CameraLocationRelativeToPlayer = Camera->GetComponentLocation();
+
+	
+	OffsetDistance = FVector::Distance(GetActorLocation(), CameraLocationRelativeToPlayer);
 }
 
 // Called every frame
 void APlayerCharThreeD::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	Gravity = FVector::DownVector * GravityForce * DeltaTime;
 
-	//addera jump och gravity 
+	//camera rotaion
+	CameraRotation = FQuat::MakeFromEuler(CameraInput);
+	
+	if (Camera)
+	{
+		CameraRotation *= DeltaTime;
+		Camera->SetRelativeRotation(CameraRotation);
+		FVector OffsetDirection = -Camera->GetRelativeRotation().Quaternion().GetForwardVector();
+		OffsetDirection *= OffsetDistance;
+		Camera->SetRelativeLocation(OffsetDirection);
+	}
+
+	Gravity = FVector::DownVector * GravityForce * DeltaTime;
+	UE_LOG(LogTemp, Warning, TEXT("Gravity vector: X=%f, Y=%f, Z=%f"), Gravity.X, Gravity.Y, Gravity.Z);
+	//add jump and gravity 
 	Velocity += Gravity + JumpMovement;
-	//calculera input.
+	UE_LOG(LogTemp, Warning, TEXT("Velocity with added gravity %s"), *Velocity.ToString()); // Log Velocity
+	//calculate input.
 	CalculateInput(DeltaTime);
-	//multiplicera med luftmotstånd
+	//multiplicera med Air resistance
+	UE_LOG(LogTemp, Warning, TEXT("Velocity with with added input %s"), *Velocity.ToString()); // Log Velocity
+
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 
-	// Get the current time before calling UpdateVelocity
-	const double StartTime = FPlatformTime::Seconds();
+	UE_LOG(LogTemp, Warning, TEXT("Velocity after air resistance input %s"), *Velocity.ToString()); // Log Velocity
 
-	// Call the UpdateVelocity function
+	double StartTime = FPlatformTime::Seconds();
+
+	// Call the UpdateVelocity function+
 	UpdateVelocity(DeltaTime);
-
+	UE_LOG(LogTemp, Warning, TEXT("Velocity after collision function %s"), *Velocity.ToString()); // Log Velocity
 	// Get the current time after UpdateVelocity has finished
-	const double EndTime = FPlatformTime::Seconds();
+	double EndTime = FPlatformTime::Seconds();
 
 	// Calculate the time taken by UpdateVelocity
-	const double TimeTaken = EndTime - StartTime;
+	double TimeTaken = EndTime - StartTime;
 
 	// Subtract the time taken by UpdateVelocity from DeltaTime
-	const float AdjustedDeltaTime = FMath::Max(DeltaTime - TimeTaken, 0.0f);
+	float AdjustedDeltaTime = FMath::Max(DeltaTime - TimeTaken, 0.0f);
+
 	if (Velocity.Size() > MaxSpeed)
 	{
 		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
 	}
-	const FVector CurrentLocation = GetActorLocation();
-	SetActorLocation(CurrentLocation + Velocity * AdjustedDeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("Velocity with delta time : %s"), *Velocity.ToString()); // Log Velocity
+	UE_LOG(LogTemp, Warning, TEXT("Velocity without delta time : %s"), *Velocity.ToString()); // Log Velocity
+	SetActorLocation(GetActorLocation() + Velocity * AdjustedDeltaTime);
+	UE_LOG(LogTemp, Warning, TEXT("Velocity whit delta time %s"), *(Velocity * AdjustedDeltaTime).ToString());
+	// Log Velocity
 	JumpMovement = FVector::ZeroVector;
-
-	/*FQuat CameraRotation = FQuat::MakeFromEuler(CameraInput);
-	CameraRotation *= DeltaTime;
-	SetActorRotation(CameraRotation);*/
-	/*CameraInput = FVector::ZeroVector;*/
+	CurrentInput = FVector::ZeroVector;
+	// måste kollas igenom 
 }
 
 // Called to bind functionality to input
@@ -90,8 +114,6 @@ void APlayerCharThreeD::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void APlayerCharThreeD::XInput(float AxisValue)
 {
-	// is clamp needed? 
-	//	CurrentInput = FVector(FMath::Clamp<float>(AxisValue, -1.0f, 1.0f), CurrentInput.Y, CurrentInput.Z);
 	CurrentInput = FVector(AxisValue, CurrentInput.Y, CurrentInput.X);
 }
 
@@ -99,8 +121,6 @@ void APlayerCharThreeD::XInput(float AxisValue)
 // vertical axis input
 void APlayerCharThreeD::YInput(float AxisValue)
 {
-	// is clamp needed
-	//CurrentInput = FVector(CurrentInput.X, FMath::Clamp<float>(AxisValue, -1.0f, 1.0f), CurrentInput.Z);
 	CurrentInput = FVector(CurrentInput.X, AxisValue, CurrentInput.Z);
 }
 
@@ -108,15 +128,22 @@ void APlayerCharThreeD::YInput(float AxisValue)
 void APlayerCharThreeD::LookRight(float AxisValue)
 {
 	YawAxisValue = AxisValue;
-	CameraInput.X += YawAxisValue * MouseSensitivity;
-	//AddControllerYawInput(AxisValue * RotationSpeed * GetWorld()->GetDeltaSeconds());
+	CameraInput.Z += YawAxisValue * MouseSensitivity;
 }
 
 void APlayerCharThreeD::LookUp(float AxisValue)
 {
 	PitchAxisValue = AxisValue;
 	CameraInput.Y += PitchAxisValue * MouseSensitivity;
-	//AddControllerPitchInput(AxisValue * RotationSpeed * GetWorld()->GetDeltaSeconds());
+	CameraRotation = FQuat::MakeFromEuler(CameraInput);
+	EulerRotation = CameraRotation.Euler();
+	if (EulerRotation.Y > MaxPitchRotaion || EulerRotation.Y < MinPitchRotation)
+	{
+		EulerRotation.Y = FMath::Clamp(EulerRotation.Y, MinPitchRotation, MaxPitchRotaion);
+		// ta bort värde så att den inte adderas i oändligthet (vilket slutligen resulterar i en 180* spin på camera) 
+		CameraInput.Y -= PitchAxisValue * MouseSensitivity;
+		CameraRotation.Y = EulerRotation.Y;
+	}
 }
 
 
@@ -124,6 +151,7 @@ void APlayerCharThreeD::LookUp(float AxisValue)
 void APlayerCharThreeD::JumpInput()
 {
 	GetActorBounds(true, Origin, Extent);
+
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
 	Params.AddIgnoredActor(this);
@@ -144,11 +172,14 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 	FHitResult NormalHit;
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
+	UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector: X=%f, Y=%f, Z=%f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
+	UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector size: %f"), TraceEnd.Size());
 	TArray<FOverlapResult> OverlapResult;
 	Params.AddIgnoredActor(this);
-	bool bHit;
-	bool bHit2;
-    	bHit = GetWorld()->SweepSingleByChannel(
+
+	bool bHit = false;
+	bool bHit2 = false;
+	bHit = GetWorld()->SweepSingleByChannel(
 		Hit,
 		TraceStart,
 		TraceEnd,
@@ -156,8 +187,10 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		ECC_Pawn,
 		FCollisionShape::MakeCapsule(Extent),
 		Params);
-	bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
-	                                          FCollisionShape::MakeCapsule(Extent), Params);
+	/*bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
+	                                          FCollisionShape::MakeCapsule(Extent), Params);*/
+
+	UE_LOG(LogTemp, Warning, TEXT("Velocity after first sweep %s"), *Velocity.ToString());
 	// ta bort sen
 	DrawDebugLine(
 		GetWorld(),
@@ -169,13 +202,31 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		0, // DepthPriority (you can adjust this if necessary)
 		2.0f // Thickness (you can adjust this to change the line's thickness)
 	);
+
 	if (bHit)
 	{
-		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth) * DeltaTime; // delta time? 
+		UE_LOG(LogTemp, Warning, TEXT("First bhit true"));
+		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth) /** DeltaTime*/; // delta time?
+		UE_LOG(LogTemp, Warning, TEXT("TraceEnd: %s"), *TraceEnd.ToString());
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
-		                                        FCollisionShape::MakeBox(Extent), Params);
+		                                        FCollisionShape::MakeCapsule(Extent), Params);
+		DrawDebugLine(
+			GetWorld(),
+			TraceStart,
+			TraceEnd,
+			FColor::Blue, // Line color (you can change this to any color you like)
+			false, // Persistent (false means the line will disappear after one frame)
+			5.0f, // LifeTime (negative value means the line will stay forever)
+			0, // DepthPriority (you can adjust this if necessary)
+			2.0f // Thickness (you can adjust this to change the line's thickness)
+		);
+		UE_LOG(LogTemp, Warning, TEXT("Velocity after Second sweep %s"), *Velocity.ToString());
+
 		//flytta actor mto normalen av träffpunkten
-		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime); // delta time? 
+		UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
+		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
+		UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
+		// delta time? 
 	}
 	/*if (!bHit && bHit2)
 	{
@@ -191,11 +242,6 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 	}*/
 
 	if (Velocity.Size() < 0.1 && Hit.GetActor() != nullptr && Hit.GetActor()->GetVelocity().Size() < 0.1)
-	{
-		RecursivCounter = 0;
-		Velocity = FVector::ZeroVector;
-	}
-	if (Velocity.Size() < 0.1)
 	{
 		RecursivCounter = 0;
 		Velocity = FVector::ZeroVector;
@@ -220,7 +266,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
 
 		Velocity += NormalPower;
-
+		UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
 		// Log the normal power
 		UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
 
@@ -248,9 +294,25 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 
 void APlayerCharThreeD::CalculateInput(float DeltaTime)
 {
-	//normalisera input vektor innan vi * med accelaration 
+	FQuat InputQuat = FQuat::MakeFromEuler(EulerRotation);
+
+	if (CurrentInput.Size() > 0.1)
+		CurrentInput = InputQuat * CurrentInput.GetSafeNormal();
+
+	GetActorBounds(true, Origin, Extent);
+	FHitResult Hit;
+	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	Params.AddIgnoredActor(this);
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
+	                                             FCollisionShape::MakeCapsule(Extent), Params);
+	if (bHit)
+	{
+		CurrentInput = FVector::VectorPlaneProject(CurrentInput.GetSafeNormal() * Acceleration * DeltaTime,
+		                                           Hit.ImpactNormal);
+	}
 	if (CurrentInput.Size() > 1) CurrentInput.Normalize(1);
-	Velocity += CurrentInput.GetSafeNormal() * Acceleration * DeltaTime;
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentInput size: %f"), CurrentInput.Size());
+	Velocity += (CurrentInput.GetSafeNormal() * Acceleration * DeltaTime);
 }
 
 void APlayerCharThreeD::ApplyFriction(float DeltaTime, float NormalMagnitude)

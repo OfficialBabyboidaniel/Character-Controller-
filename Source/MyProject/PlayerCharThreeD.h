@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "State.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharThreeD.generated.h"
 
@@ -27,13 +28,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-
 	void XInput(float AxisValue);
 	void YInput(float AxisValue);
 	void JumpInput();
 	void LookRight(float AxisValue);
 	void LookUp(float AxisValue);
-	
+
 	//Vectors values
 	FVector CurrentInput;
 	FVector Velocity = FVector::ZeroVector;
@@ -41,24 +41,39 @@ private:
 	FVector Gravity;
 
 	//camera values
-	UPROPERTY(EditAnywhere, Category="Stats")
-	double MouseSensitivity = 20;
-	double YawAxisValue;
-	double PitchAxisValue;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	class UCameraComponent* Camera;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double MouseSensitivity = 2;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double MaxPitchRotaion = 70;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double MinPitchRotation = -30;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FQuat CameraRotation;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector EulerRotation;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector CameraLocationRelativeToPlayer;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	FVector CameraInput = FVector::ZeroVector;
-	
-	//distance value
-	double Distance;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector RotationY;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector RotationZ;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	double YawAxisValue;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	double PitchAxisValue;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	double OffsetDistance;
+
 
 	//Sweep values
 	FVector Origin, Extent;
 	FCollisionQueryParams Params;
 
 	//stats
-	
-	UPROPERTY(EditAnywhere, Category="Stats") // ta bort sen
-	float RotationSpeed = 25.0f;
-
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float Acceleration = 500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
@@ -72,19 +87,21 @@ private:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float JumpForce = 400.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	int RecursivCounter = 0;
-	UPROPERTY(EditAnywhere, Category="Stats")
 	double StaticFrictionCoefficient = 0.6;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	double KineticFrictionCoefficient = 0.4;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	double AirResistanceCoefficient = 0.6;
 
+	UPROPERTY(VisibleAnywhere, Category="State")
+	//class State CurrentState;
+	
+	
+	int RecursivCounter = 0;
 
 	//functions
 	void UpdateVelocity(float DeltaTime);
 	void CalculateInput(float DeltaTime);
 	// kanske behövs göras om till  vector value ist för float
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
-	
-};                      
+};
