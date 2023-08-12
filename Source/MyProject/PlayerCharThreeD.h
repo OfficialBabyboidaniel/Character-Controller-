@@ -95,8 +95,9 @@ private:
 	double AirResistanceCoefficient = 0.6;
 
 	UPROPERTY(VisibleAnywhere, Category="State")
-	//class State CurrentState;
-	
+	class UStateComponent* CurrentState;
+	UPROPERTY(VisibleAnywhere, Category="State")
+	class UStateMachineComponent* StateMachineComponent;
 	
 	int RecursivCounter = 0;
 

@@ -10,6 +10,7 @@
 #include "Util/ColorConstants.h"
 #include "DrawDebugHelpers.h"
 #include "Quaternion.h"
+#include "StateMachineComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h" // Include the SpringArmComponent header
 #include "Camera/CameraComponent.h"
@@ -26,6 +27,8 @@ APlayerCharThreeD::APlayerCharThreeD()
 	PrimaryActorTick.bCanEverTick = true;
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	StateMachineComponent = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine"));
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +43,11 @@ void APlayerCharThreeD::BeginPlay()
 		OffsetDistance = FVector::Distance(GetActorLocation(), CameraLocationRelativeToPlayer);
 	}
 	Params.AddIgnoredActor(this);
+
+	if(StateMachineComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StateMachine created correctly"));
+	}
 }
 
 
@@ -58,24 +66,24 @@ void APlayerCharThreeD::Tick(float DeltaTime)
 	}
 
 	Gravity = FVector::DownVector * GravityForce * DeltaTime;
-	UE_LOG(LogTemp, Warning, TEXT("Gravity vector: X=%f, Y=%f, Z=%f"), Gravity.X, Gravity.Y, Gravity.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("Gravity vector: X=%f, Y=%f, Z=%f"), Gravity.X, Gravity.Y, Gravity.Z);
 	//add jump and gravity 
 	Velocity += Gravity + JumpMovement;
-	UE_LOG(LogTemp, Warning, TEXT("Velocity with added gravity %s"), *Velocity.ToString()); // Log Velocity
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity with added gravity %s"), *Velocity.ToString()); // Log Velocity
 	//calculate input.
 	CalculateInput(DeltaTime);
 	//multiplicera med Air resistance
-	UE_LOG(LogTemp, Warning, TEXT("Velocity with with added input %s"), *Velocity.ToString()); // Log Velocity
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity with with added input %s"), *Velocity.ToString()); // Log Velocity
 
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 
-	UE_LOG(LogTemp, Warning, TEXT("Velocity after air resistance input %s"), *Velocity.ToString()); // Log Velocity
+	// UE_LOG(LogTemp, Warning, TEXT("Velocity after air resistance input %s"), *Velocity.ToString()); // Log Velocity
 
 	double StartTime = FPlatformTime::Seconds();
 
 	// Call the UpdateVelocity function+
 	UpdateVelocity(DeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("Velocity after collision function %s"), *Velocity.ToString()); // Log Velocity
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity after collision function %s"), *Velocity.ToString()); // Log Velocity
 	// Get the current time after UpdateVelocity has finished
 	double EndTime = FPlatformTime::Seconds();
 
@@ -89,9 +97,9 @@ void APlayerCharThreeD::Tick(float DeltaTime)
 	{
 		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Velocity without delta time : %s"), *Velocity.ToString()); // Log Velocity
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity without delta time : %s"), *Velocity.ToString()); // Log Velocity
 	SetActorLocation(GetActorLocation() + Velocity * AdjustedDeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("Velocity whit delta time %s"), *(Velocity * AdjustedDeltaTime).ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity whit delta time %s"), *(Velocity * AdjustedDeltaTime).ToString());
 	// Log Velocity
 	JumpMovement = FVector::ZeroVector;
 	CurrentInput = FVector::ZeroVector;
