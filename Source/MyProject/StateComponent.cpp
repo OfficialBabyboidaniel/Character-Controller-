@@ -12,7 +12,7 @@ UStateComponent::UStateComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	StateMachineRef = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine"));
+//	StateMachineRef = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine"));
 	// ...
 }
 
@@ -23,7 +23,7 @@ void UStateComponent::BeginPlay()
 	Super::BeginPlay();
 
 	/*StateMachineRef.States.Add(this);*/
-	StateMachineRef->States.Add(this);
+
 }
 
 
@@ -32,17 +32,21 @@ void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	UE_LOG(LogTemp, Warning, TEXT("regular state ticking"));
 	// ...
 }
 
 void UStateComponent::Enter()
 {
+	bShouldTick = true;
 }
 
 void UStateComponent::Update()
 {
+	
 }
 
 void UStateComponent::Exit()
 {
+	bShouldTick = false;
 }

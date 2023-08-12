@@ -26,9 +26,10 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Enter();
-	void Update();
+	virtual void Update();
 	void Exit();
 
-
-	class UStateMachineComponent* StateMachineRef;
+	bool bShouldTick = false;
+	//behövs nog inte
+	//	class UStateMachineComponent* StateMachineRef;
 };

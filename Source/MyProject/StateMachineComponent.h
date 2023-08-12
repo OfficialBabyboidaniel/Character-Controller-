@@ -2,8 +2,12 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
+#include "AirState.h"
+#include "GroundState.h"
 #include "Components/ActorComponent.h"
+#include  "StateComponent.h"
 #include "StateMachineComponent.generated.h"
 
 
@@ -24,9 +28,10 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	TArray<class UStateComponent*> States;
+	TArray<UStateComponent*> States;
 
-	void ChangeState(class StateComponent* State);
-
+	void ChangeState(UStateComponent* State);
+	UGroundState* GroundState;
+	UAirState* AirState;
 	
 };

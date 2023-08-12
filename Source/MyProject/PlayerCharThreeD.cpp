@@ -44,8 +44,15 @@ void APlayerCharThreeD::BeginPlay()
 	}
 	Params.AddIgnoredActor(this);
 
-	if(StateMachineComponent)
+	if (StateMachineComponent)
 	{
+		if (StateMachineComponent->States.Num() > 0)
+		{
+			
+			StateMachineComponent->ChangeState(StateMachineComponent->States[0]);
+			UE_LOG(LogTemp, Warning, TEXT("StateMachine changed state correctly"));
+		}
+		//states null, we try adding airstate and see what happens
 		UE_LOG(LogTemp, Warning, TEXT("StateMachine created correctly"));
 	}
 }
@@ -172,8 +179,8 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 	FHitResult NormalHit;
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
-	UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector: X=%f, Y=%f, Z=%f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
-	UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector size: %f"), TraceEnd.Size());
+	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector: X=%f, Y=%f, Z=%f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector size: %f"), TraceEnd.Size());
 	TArray<FOverlapResult> OverlapResult;
 
 
@@ -190,7 +197,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 	/*bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
 	                                          FCollisionShape::MakeCapsule(Extent), Params);*/
 
-	UE_LOG(LogTemp, Warning, TEXT("Velocity after first sweep %s"), *Velocity.ToString());
+	//	UE_LOG(LogTemp, Warning, TEXT("Velocity after first sweep %s"), *Velocity.ToString());
 	// ta bort sen
 	DrawDebugLine(
 		GetWorld(),
@@ -205,9 +212,9 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("First bhit true"));
+		//UE_LOG(LogTemp, Warning, TEXT("First bhit true"));
 		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth) /** DeltaTime*/; // delta time?
-		UE_LOG(LogTemp, Warning, TEXT("TraceEnd: %s"), *TraceEnd.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("TraceEnd: %s"), *TraceEnd.ToString());
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeCapsule(Extent), Params);
 		DrawDebugLine(
@@ -220,12 +227,12 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 			0, // DepthPriority (you can adjust this if necessary)
 			2.0f // Thickness (you can adjust this to change the line's thickness)
 		);
-		UE_LOG(LogTemp, Warning, TEXT("Velocity after Second sweep %s"), *Velocity.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Velocity after Second sweep %s"), *Velocity.ToString());
 
 		//flytta actor mto normalen av träffpunkten
-		UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
 		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
-		UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
 		// delta time? 
 	}
 	/*if (!bHit && bHit2)
@@ -258,17 +265,17 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		if (Hit.GetActor() != nullptr)
 		{
 			// Log the name of the actor that was hit
-			UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *Hit.GetActor()->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *Hit.GetActor()->GetName());
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Velocity Before: X=%f, Y=%f, Z=%f"), Velocity.X, Velocity.Y, Velocity.Z);
+		//UE_LOG(LogTemp, Warning, TEXT("Velocity Before: X=%f, Y=%f, Z=%f"), Velocity.X, Velocity.Y, Velocity.Z);
 
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
 
 		Velocity += NormalPower;
-		UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
 		// Log the normal power
-		UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
+		//UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
 
 
 		/*FVector GroundMovement = Hit.GetActor()->GetVelocity();
@@ -287,7 +294,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("RecursivCounter: %d"), RecursivCounter);
+	//UE_LOG(LogTemp, Warning, TEXT("RecursivCounter: %d"), RecursivCounter);
 
 	RecursivCounter = 0;
 }
@@ -361,10 +368,10 @@ void APlayerCharThreeD::CameraCollisionCheck()
 	GetActorBounds(true, Origin, Extent);
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Camera->GetComponentLocation();
-	UE_LOG(LogTemp, Warning, TEXT("TraceEnd Size: %f"), TraceEnd.Size());
-	UE_LOG(LogTemp, Warning, TEXT("OffsetDirection Size: %f"), OffsetDistance);
+	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd Size: %f"), TraceEnd.Size());
+	//UE_LOG(LogTemp, Warning, TEXT("OffsetDirection Size: %f"), OffsetDistance);
 	bool CameraSweep = GetWorld()->SweepSingleByChannel(CameraHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
-														FCollisionShape::MakeSphere(CameraSkinWidth * 2), Params);
+	                                                    FCollisionShape::MakeSphere(CameraSkinWidth * 2), Params);
 	if (CameraSweep)
 	{
 		FVector NewOffsetDirection = -Camera->GetRelativeRotation().Quaternion().GetForwardVector();

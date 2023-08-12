@@ -10,6 +10,20 @@ UStateMachineComponent::UStateMachineComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	UStateComponent* AirStatee = CreateDefaultSubobject<UAirState>(TEXT("State"));
+	/*GroundState = CreateDefaultSubobject<UGroundState>(TEXT("AirState"));
+	AirState = CreateDefaultSubobject<UAirState>(TEXT("AirState"));
+	if (AirState && GroundState)
+	{
+		States.Add(GroundState);
+		States.Add(AirState);
+	}*/
+	AirState = CreateDefaultSubobject<UAirState>(TEXT("AirState"));
+	if (AirStatee && AirState)
+	{
+		States.Add(AirState);
+		States.Add(AirStatee);
+	}
 	// ...
 }
 
@@ -20,20 +34,21 @@ void UStateMachineComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 
 // Called every frame
-void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                           FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
 }
 
-void UStateMachineComponent::ChangeState(StateComponent* State)
+void UStateMachineComponent::ChangeState(UStateComponent* State)
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("Changing states"));
+	if (State)
+		State->Enter();
 }
-
