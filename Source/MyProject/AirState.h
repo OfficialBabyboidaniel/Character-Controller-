@@ -27,5 +27,5 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void Update() override;
+	virtual void Update(float DeltaTime) override;
 };

@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharThreeD.generated.h"
 
+class UCameraComponent;
 UCLASS()
 class MYPROJECT_API APlayerCharThreeD : public ACharacter
 {
@@ -27,6 +28,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+//get functions
+	UCameraComponent* GetCameraComp() const;
+	FVector GetCurrentInput() const;
+	FVector GetJumpInput() const;
+	float GetPitchAxisValue() const;
+	float GetYawAxisValue() const;
+	void SetCurrentInput(const FVector NewValue);
+	void SetJumpInput(const FVector NewValue);
+
+	
+	
 private:
 	void XInput(float AxisValue);
 	void YInput(float AxisValue);
@@ -112,5 +124,7 @@ private:
 	void CalculatePitchInput();
 	void SetInitialCameraLocation(float DeltaTime);
 	void CameraCollisionCheck();
+	void CaluclateInitialVelocity(float DeltaTime);
 	
 };
+

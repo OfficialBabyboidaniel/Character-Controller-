@@ -7,6 +7,7 @@
 #include "StateComponent.generated.h"
 
 
+class APlayerCharThreeD;
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MYPROJECT_API UStateComponent : public UActorComponent
 {
@@ -26,10 +27,11 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Enter();
-	virtual void Update();
+	virtual void Update(float DeltaTime);
 	void Exit();
 
 	bool bShouldTick = false;
-	//behövs nog inte
-	//	class UStateMachineComponent* StateMachineRef;
+
+protected:
+	APlayerCharThreeD* PlayerCharThreeD;
 };

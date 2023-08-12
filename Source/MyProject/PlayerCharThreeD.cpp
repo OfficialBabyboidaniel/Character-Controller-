@@ -35,20 +35,19 @@ APlayerCharThreeD::APlayerCharThreeD()
 void APlayerCharThreeD::BeginPlay()
 {
 	Super::BeginPlay();
-	Camera = FindComponentByClass<UCameraComponent>();
+	/*Camera = FindComponentByClass<UCameraComponent>();
 	if (Camera)
 	{
 		CameraLocationRelativeToPlayer = Camera->GetComponentLocation();
 		// get distance between player and camera
 		OffsetDistance = FVector::Distance(GetActorLocation(), CameraLocationRelativeToPlayer);
 	}
-	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(this);*/
 
 	if (StateMachineComponent)
 	{
 		if (StateMachineComponent->States.Num() > 0)
 		{
-			
 			StateMachineComponent->ChangeState(StateMachineComponent->States[0]);
 			UE_LOG(LogTemp, Warning, TEXT("StateMachine changed state correctly"));
 		}
@@ -58,36 +57,38 @@ void APlayerCharThreeD::BeginPlay()
 }
 
 
+void APlayerCharThreeD::CaluclateInitialVelocity(float DeltaTime)
+{
+	Gravity = FVector::DownVector * GravityForce * DeltaTime;
+
+	Velocity += Gravity + JumpMovement;
+}
+
 // Called every frame
 void APlayerCharThreeD::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	//camera rotaion
-	CameraRotation = FQuat::MakeFromEuler(CameraInput);
+	/*CameraRotation = FQuat::MakeFromEuler(CameraInput);
 
 	if (Camera)
 	{
 		SetInitialCameraLocation(DeltaTime);
 		CameraCollisionCheck();
-	}
+	}*/
 
-	Gravity = FVector::DownVector * GravityForce * DeltaTime;
-	//UE_LOG(LogTemp, Warning, TEXT("Gravity vector: X=%f, Y=%f, Z=%f"), Gravity.X, Gravity.Y, Gravity.Z);
-	//add jump and gravity 
-	Velocity += Gravity + JumpMovement;
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity with added gravity %s"), *Velocity.ToString()); // Log Velocity
-	//calculate input.
+	/*
+	CaluclateInitialVelocity(DeltaTime);
 	CalculateInput(DeltaTime);
+
+
 	//multiplicera med Air resistance
 	//UE_LOG(LogTemp, Warning, TEXT("Velocity with with added input %s"), *Velocity.ToString()); // Log Velocity
-
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 
 	// UE_LOG(LogTemp, Warning, TEXT("Velocity after air resistance input %s"), *Velocity.ToString()); // Log Velocity
-
 	double StartTime = FPlatformTime::Seconds();
-
 	// Call the UpdateVelocity function+
 	UpdateVelocity(DeltaTime);
 	//UE_LOG(LogTemp, Warning, TEXT("Velocity after collision function %s"), *Velocity.ToString()); // Log Velocity
@@ -107,9 +108,12 @@ void APlayerCharThreeD::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("Velocity without delta time : %s"), *Velocity.ToString()); // Log Velocity
 	SetActorLocation(GetActorLocation() + Velocity * AdjustedDeltaTime);
 	//UE_LOG(LogTemp, Warning, TEXT("Velocity whit delta time %s"), *(Velocity * AdjustedDeltaTime).ToString());
-	// Log Velocity
-	JumpMovement = FVector::ZeroVector;
+	// Log Velocity*/
+
+	//how do i reset this in the state? 
+	/*JumpMovement = FVector::ZeroVector;
 	CurrentInput = FVector::ZeroVector;
+	*/
 	// måste kollas igenom 
 }
 
@@ -124,6 +128,41 @@ void APlayerCharThreeD::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Y", this, &APlayerCharThreeD::YInput);
 	PlayerInputComponent->BindAxis("LookRight", this, &APlayerCharThreeD::LookRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharThreeD::LookUp);
+}
+
+UCameraComponent* APlayerCharThreeD::GetCameraComp() const
+{
+	return Camera;
+}
+
+FVector APlayerCharThreeD::GetCurrentInput() const
+{
+	return CurrentInput;
+}
+
+FVector APlayerCharThreeD::GetJumpInput() const
+{
+	return JumpMovement;
+}
+
+float APlayerCharThreeD::GetPitchAxisValue() const
+{
+	return PitchAxisValue;
+}
+
+float APlayerCharThreeD::GetYawAxisValue() const
+{
+	return YawAxisValue;
+}
+
+void APlayerCharThreeD::SetCurrentInput(const FVector NewValue)
+{
+	CurrentInput = NewValue;
+}
+
+void APlayerCharThreeD::SetJumpInput(const FVector NewValue)
+{
+	JumpMovement = NewValue;
 }
 
 
@@ -143,14 +182,14 @@ void APlayerCharThreeD::YInput(float AxisValue)
 void APlayerCharThreeD::LookRight(float AxisValue)
 {
 	YawAxisValue = AxisValue;
-	CameraInput.Z += YawAxisValue * MouseSensitivity;
+	/*CameraInput.Z += YawAxisValue * MouseSensitivity;*/
 }
 
 void APlayerCharThreeD::LookUp(float AxisValue)
 {
 	PitchAxisValue = AxisValue;
-	CameraInput.Y += PitchAxisValue * MouseSensitivity;
-	CalculatePitchInput();
+	/*CameraInput.Y += PitchAxisValue * MouseSensitivity;
+	CalculatePitchInput();*/
 }
 
 

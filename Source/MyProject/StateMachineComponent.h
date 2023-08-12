@@ -11,6 +11,7 @@
 #include "StateMachineComponent.generated.h"
 
 
+class APlayerCharThreeD;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT_API UStateMachineComponent : public UActorComponent
 {
@@ -29,9 +30,11 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	TArray<UStateComponent*> States;
+	UStateComponent* CurrentState;
 
 	void ChangeState(UStateComponent* State);
 	UGroundState* GroundState;
 	UAirState* AirState;
+	APlayerCharThreeD* PlayerCharThreeD;
 	
 };

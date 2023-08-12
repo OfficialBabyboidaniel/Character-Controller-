@@ -3,7 +3,9 @@
 
 #include "StateComponent.h"
 
-#include "StateMachineComponent.h"
+#include "PlayerCharThreeD.h"
+#include "Kismet/GameplayStatics.h"
+
 
 // Sets default values for this component's properties
 UStateComponent::UStateComponent()
@@ -12,8 +14,6 @@ UStateComponent::UStateComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-//	StateMachineRef = CreateDefaultSubobject<UStateMachineComponent>(TEXT("StateMachine"));
-	// ...
 }
 
 
@@ -22,8 +22,10 @@ void UStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*StateMachineRef.States.Add(this);*/
-
+	if (Cast<APlayerCharThreeD>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		PlayerCharThreeD = Cast<APlayerCharThreeD>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	}
 }
 
 
@@ -31,9 +33,7 @@ void UStateComponent::BeginPlay()
 void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	UE_LOG(LogTemp, Warning, TEXT("regular state ticking"));
-	// ...
+	
 }
 
 void UStateComponent::Enter()
@@ -41,7 +41,7 @@ void UStateComponent::Enter()
 	bShouldTick = true;
 }
 
-void UStateComponent::Update()
+void UStateComponent::Update(float DeltaTime)
 {
 	
 }

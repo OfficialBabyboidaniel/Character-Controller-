@@ -18,13 +18,13 @@ void UAirState::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	if(bShouldTick)
 	{
-		Update();	
+		Update(DeltaTime);	
 	}
 }
 
-void UAirState::Update()
+void UAirState::Update(float DeltaTime)
 {
-	Super::Update();
+	Super::Update(DeltaTime);
 
 	UE_LOG(LogTemp, Warning, TEXT("Airstate ticking"));
 }
