@@ -31,52 +31,14 @@ public:
 private:
 	//Vectors values
 	FVector CurrentInput;
-	FVector Velocity = FVector::ZeroVector;
 	FVector Gravity;
-
-	//camera properties
-	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	class UCameraComponent* Camera;
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	FVector CameraLocationRelativeToPlayer;
-
-	//camera rotation
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	FQuat CameraRotation;
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	FVector EulerRotation;
-	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	double MaxPitchRotaion = 30;
-	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	double MinPitchRotation = -50;
-
-	//camera input and variables
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	FVector CameraInput = FVector::ZeroVector;
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	double OffsetDistance;
-	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	double MouseSensitivity = 2;
-	UPROPERTY(EditAnywhere, Category="Camera Stats")
-	double CameraSkinWidth = 5;
-
-	//Sweep values
-	FVector Origin, Extent;
-	FCollisionQueryParams Params;
 
 	//player stats
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float Acceleration = 500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float MaxSpeed = 2500.0f;
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float SkinWidth = 1.2f;
-
-	//jump variables
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float JumpForce = 400.0f;
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 1.5f;
+	
 
 	//Physics values
 	UPROPERTY(EditAnywhere, Category="Stats")
@@ -101,9 +63,6 @@ private:
 	void CalculateInput(float DeltaTime);
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
 	
-	//help functions
-	void CalculatePitchInput();
-	void SetInitialCameraLocation(float DeltaTime);
-	void CameraCollisionCheck();
+	
 	void CalculateInitialVelocity(float DeltaTime);
 };

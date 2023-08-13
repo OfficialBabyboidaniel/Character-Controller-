@@ -61,4 +61,6 @@ void UStateMachineComponent::ChangeState(UStateComponent* State)
 
 	if (State)
 		State->Enter();
+
+	
 }

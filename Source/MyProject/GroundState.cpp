@@ -6,32 +6,22 @@
 #include "PlayerCharThreeD.h"
 #include "StaticHelperClass.h"
 #include "Camera/CameraComponent.h"
-
 // are all of these needed?
-#include <Windows.Graphics.Display.h>
 #include "Styling/StyleColors.h"
 #include "DrawDebugHelpers.h"
 #include "Quaternion.h"
 #include "StateMachineComponent.h"
-#include "GameFramework/SpringArmComponent.h" // Include the SpringArmComponent header
 #include "Math/UnrealMathUtility.h"
 
 UGroundState::UGroundState()
 {
+	
 }
 
 void UGroundState::BeginPlay()
 {
 	Super::BeginPlay();
-	Camera = PlayerCharThreeD->FindComponentByClass<UCameraComponent>();
-	if (Camera)
-	{
-		CameraLocationRelativeToPlayer = Camera->GetComponentLocation();
-		// get distance between player and camera
-		OffsetDistance = FVector::Distance(PlayerCharThreeD->GetActorLocation(), CameraLocationRelativeToPlayer);
-	}
-	
-	Params.AddIgnoredActor(PlayerCharThreeD);
+
 }
 
 void UGroundState::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -47,31 +37,6 @@ void UGroundState::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UGroundState::Update(float DeltaTime)
 {
 	Super::Update(DeltaTime);
-	
-	//check if state is valid and if it should change state
-	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
-	FHitResult Hit;
-	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
-	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
-												 FCollisionShape::MakeCapsule(Extent), Params);
-	if (!bHit)
-	{
-		//byte till airstate
-		PlayerCharThreeD->GetStateMachine()->ChangeState(PlayerCharThreeD->GetStateMachine()->States[1]);
-		return; 
-	}
-	//check done, continue with update function
-
-	
-	CameraInput.Z += PlayerCharThreeD->GetYawAxisValue() * MouseSensitivity;
-	CameraInput.Y += PlayerCharThreeD->GetPitchAxisValue() * MouseSensitivity;
-	CalculatePitchInput();
-	CameraRotation = FQuat::MakeFromEuler(CameraInput);
-	if (Camera)
-	{
-		SetInitialCameraLocation(DeltaTime);
-		CameraCollisionCheck();
-	}
 	
 	CurrentInput = PlayerCharThreeD->GetCurrentInput();
 	CalculateInitialVelocity(DeltaTime);
@@ -94,6 +59,20 @@ void UGroundState::Update(float DeltaTime)
 	//reset values for next tick calculation
 	PlayerCharThreeD->SetCurrentInput(FVector::ZeroVector);
 	PlayerCharThreeD->SetJumpInput(FVector::ZeroVector);
+
+	//check if state is valid and if it should change state
+	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	FHitResult Hit;
+	const FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	const bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
+													   FCollisionShape::MakeCapsule(Extent), Params);
+	if (!bHit)
+	{
+		//byte till airstate
+		PlayerCharThreeD->GetStateMachine()->ChangeState(PlayerCharThreeD->GetStateMachine()->States[1]);
+		return; 
+	}
+	//check done, continue with update function
 }
 
 
@@ -278,43 +257,3 @@ void UGroundState::CalculateInitialVelocity(float DeltaTime)
 	Velocity += Gravity + PlayerCharThreeD->GetJumpInput();
 }
 
-//Camera
-void UGroundState::CalculatePitchInput()
-{
-	CameraRotation = FQuat::MakeFromEuler(CameraInput);
-	EulerRotation = CameraRotation.Euler();
-	//clamp pitch value if reached max/min rotaion
-	if (EulerRotation.Y > MaxPitchRotaion || EulerRotation.Y < MinPitchRotation)
-	{
-		EulerRotation.Y = FMath::Clamp(EulerRotation.Y, MinPitchRotation, MaxPitchRotaion);
-		//remove value so it does not add to the input forever, prevents a 180* spin 
-		CameraInput.Y -= PlayerCharThreeD->GetPitchAxisValue() * MouseSensitivity;
-		CameraRotation.Y = EulerRotation.Y;
-	}
-}
-
-void UGroundState::SetInitialCameraLocation(float DeltaTime)
-{
-	CameraRotation *= DeltaTime;
-	Camera->SetRelativeRotation(CameraRotation);
-	FVector OffsetDirection = -Camera->GetRelativeRotation().Quaternion().GetForwardVector();
-	OffsetDirection *= OffsetDistance;
-	Camera->SetRelativeLocation(OffsetDirection);
-}
-
-void UGroundState::CameraCollisionCheck()
-{
-	FHitResult CameraHit;
-	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
-	FVector TraceStart = Origin;
-	FVector TraceEnd = Camera->GetComponentLocation();
-	bool CameraSweep = GetWorld()->SweepSingleByChannel(CameraHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
-	                                                    FCollisionShape::MakeSphere(CameraSkinWidth * 2), Params);
-	if (CameraSweep)
-	{
-		FVector NewOffsetDirection = -Camera->GetRelativeRotation().Quaternion().
-		                                      GetForwardVector();
-		Camera->SetRelativeLocation(
-			NewOffsetDirection *= (CameraHit.Distance - CameraSkinWidth));
-	}
-}

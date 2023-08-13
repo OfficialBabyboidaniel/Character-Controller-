@@ -34,4 +34,52 @@ public:
 
 protected:
 	APlayerCharThreeD* PlayerCharThreeD;
+
+	//jump variables
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float JumpForce = 400.0f;
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float GroundCheckDistance = 1.5f;
+
+	UPROPERTY(EditAnywhere, Category="Stats")
+	float SkinWidth = 1.2f;
+
+	//vector value
+	FVector Velocity = FVector::ZeroVector;
+	
+	//Sweep values
+	FVector Origin, Extent;
+	FCollisionQueryParams Params;
+	
+	//camera properties
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	class UCameraComponent* Camera;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector CameraLocationRelativeToPlayer;
+
+	//camera rotation
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FQuat CameraRotation;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector EulerRotation;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double MaxPitchRotaion = 30;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double MinPitchRotation = -50;
+
+	//camera input and variables
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	FVector CameraInput = FVector::ZeroVector;
+	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
+	double OffsetDistance;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double MouseSensitivity = 2;
+	UPROPERTY(EditAnywhere, Category="Camera Stats")
+	double CameraSkinWidth = 5;
+
+	
+
+	void CalculatePitchInput();
+	void SetInitialCameraLocation(float DeltaTime);
+	void CameraCollisionCheck();
 };
