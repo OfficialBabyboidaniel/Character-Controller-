@@ -54,6 +54,8 @@ void UStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UStateMachineComponent::ChangeState(UStateComponent* State)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Changing states %s"), *State->GetName());
+	if (CurrentState)
+		CurrentState->Exit();
 	if (State)
 		CurrentState = State;
 

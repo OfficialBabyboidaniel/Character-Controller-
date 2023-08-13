@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharThreeD.generated.h"
 
+class UStateMachineComponent;
 class UCameraComponent;
 UCLASS()
 class MYPROJECT_API APlayerCharThreeD : public ACharacter
@@ -27,13 +28,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-//get and set functions
+	//get and set functions
 	FVector GetCurrentInput() const;
 	FVector GetJumpInput() const;
 	float GetPitchAxisValue() const;
 	float GetYawAxisValue() const;
+	UStateMachineComponent* GetStateMachine() const;
 	void SetCurrentInput(const FVector NewValue);
 	void SetJumpInput(const FVector NewValue);
+
 private:
 	void XInput(float AxisValue);
 	void YInput(float AxisValue);
@@ -43,9 +46,7 @@ private:
 
 	//Vectors values
 	FVector CurrentInput;
-	FVector Velocity = FVector::ZeroVector;
 	FVector JumpMovement;
-	FVector Gravity;
 
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	double YawAxisValue;
@@ -63,10 +64,9 @@ private:
 	float JumpForce = 400.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float SkinWidth = 1.2f;
-	
+
 	UPROPERTY(VisibleAnywhere, Category="State")
 	class UStateComponent* CurrentState;
 	UPROPERTY(VisibleAnywhere, Category="State")
 	class UStateMachineComponent* StateMachineComponent;
 };
-

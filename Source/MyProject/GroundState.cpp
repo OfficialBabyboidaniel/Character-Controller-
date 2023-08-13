@@ -18,7 +18,6 @@
 
 UGroundState::UGroundState()
 {
-	
 }
 
 void UGroundState::BeginPlay()
@@ -31,7 +30,7 @@ void UGroundState::BeginPlay()
 		// get distance between player and camera
 		OffsetDistance = FVector::Distance(PlayerCharThreeD->GetActorLocation(), CameraLocationRelativeToPlayer);
 	}
-
+	
 	Params.AddIgnoredActor(PlayerCharThreeD);
 }
 
@@ -48,71 +47,56 @@ void UGroundState::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UGroundState::Update(float DeltaTime)
 {
 	Super::Update(DeltaTime);
-	//UE_LOG(LogTemp, Warning, TEXT("groundState ticking"));
+	
+	//check if state is valid and if it should change state
+	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	FHitResult Hit;
+	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
+												 FCollisionShape::MakeCapsule(Extent), Params);
+	if (!bHit)
+	{
+		//byte till airstate
+		PlayerCharThreeD->GetStateMachine()->ChangeState(PlayerCharThreeD->GetStateMachine()->States[1]);
+		return; 
+	}
+	//check done, continue with update function
 
 	
-	//camera rotaion
 	CameraInput.Z += PlayerCharThreeD->GetYawAxisValue() * MouseSensitivity;
 	CameraInput.Y += PlayerCharThreeD->GetPitchAxisValue() * MouseSensitivity;
 	CalculatePitchInput();
 	CameraRotation = FQuat::MakeFromEuler(CameraInput);
-	
 	if (Camera)
 	{
 		SetInitialCameraLocation(DeltaTime);
 		CameraCollisionCheck();
 	}
-
+	
 	CurrentInput = PlayerCharThreeD->GetCurrentInput();
-
-	CaluclateInitialVelocity(DeltaTime);
+	CalculateInitialVelocity(DeltaTime);
 	CalculateInput(DeltaTime);
-
-
-	//multiplicera med Air resistance
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity with with added input %s"), *Velocity.ToString()); // Log Velocity
+	
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 
-	// UE_LOG(LogTemp, Warning, TEXT("Velocity after air resistance input %s"), *Velocity.ToString()); // Log Velocity
-	double StartTime = FPlatformTime::Seconds();
-	// Call the UpdateVelocity function+
-	//
+	const double StartTime = FPlatformTime::Seconds();
 	UpdateVelocity(DeltaTime);
-	//
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity after collision function %s"), *Velocity.ToString()); // Log Velocity
-	// Get the current time after UpdateVelocity has finished
-	double EndTime = FPlatformTime::Seconds();
-
-	// Calculate the time taken by UpdateVelocity
-	double TimeTaken = EndTime - StartTime;
-
-	// Subtract the time taken by UpdateVelocity from DeltaTime
-	float AdjustedDeltaTime = FMath::Max(DeltaTime - TimeTaken, 0.0f);
+	const double EndTime = FPlatformTime::Seconds();
+	const double TimeTaken = EndTime - StartTime;
+	const float AdjustedDeltaTime = FMath::Max(DeltaTime - TimeTaken, 0.0f);
 
 	if (Velocity.Size() > MaxSpeed)
 	{
 		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity without delta time : %s"), *Velocity.ToString()); // Log Velocity
+	
 	PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() + Velocity * AdjustedDeltaTime);
-	//SetActorLocation(GetActorLocation() + Velocity * AdjustedDeltaTime);
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity whit delta time %s"), *(Velocity * AdjustedDeltaTime).ToString());
-	// Log Velocity
-
 	//reset values for next tick calculation
 	PlayerCharThreeD->SetCurrentInput(FVector::ZeroVector);
 	PlayerCharThreeD->SetJumpInput(FVector::ZeroVector);
-
-	// måste kollas igenom
 }
 
 
-void UGroundState::CaluclateInitialVelocity(float DeltaTime)
-{
-	Gravity = FVector::DownVector * GravityForce * DeltaTime;
-
-	Velocity += Gravity + PlayerCharThreeD->GetJumpInput();
-}
 
 void UGroundState::UpdateVelocity(float DeltaTime)
 {
@@ -249,10 +233,8 @@ void UGroundState::CalculateInput(float DeltaTime)
 	if (CurrentInput.Size() > 0.1)
 	{
 		CurrentInput = InputQuat * CurrentInput.GetSafeNormal();
-		UE_LOG(LogTemp, Warning, TEXT("CurrentInput size: %f"), CurrentInput.Size());
 	}
-
-
+	
 	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
@@ -266,8 +248,8 @@ void UGroundState::CalculateInput(float DeltaTime)
 			Hit.ImpactNormal);
 	}
 	if (CurrentInput.Size() > 1) CurrentInput.Normalize(1);
-	//UE_LOG(LogTemp, Warning, TEXT("CurrentInput size: %f"), CurrentInput.Size());
-	Velocity += (CurrentInput.GetSafeNormal() * Acceleration * DeltaTime);
+	
+	Velocity += CurrentInput.GetSafeNormal() * Acceleration * DeltaTime;
 }
 
 void UGroundState::ApplyFriction(float DeltaTime, float NormalMagnitude)
@@ -287,6 +269,14 @@ void UGroundState::ApplyFriction(float DeltaTime, float NormalMagnitude)
 }
 
 //helper functions
+
+//velocity 
+void UGroundState::CalculateInitialVelocity(float DeltaTime)
+{
+	Gravity = FVector::DownVector * GravityForce * DeltaTime;
+
+	Velocity += Gravity + PlayerCharThreeD->GetJumpInput();
+}
 
 //Camera
 void UGroundState::CalculatePitchInput()
@@ -318,18 +308,13 @@ void UGroundState::CameraCollisionCheck()
 	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Camera->GetComponentLocation();
-	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd Size: %f"), TraceEnd.Size());
-	//UE_LOG(LogTemp, Warning, TEXT("OffsetDirection Size: %f"), OffsetDistance);
 	bool CameraSweep = GetWorld()->SweepSingleByChannel(CameraHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                                    FCollisionShape::MakeSphere(CameraSkinWidth * 2), Params);
 	if (CameraSweep)
 	{
 		FVector NewOffsetDirection = -Camera->GetRelativeRotation().Quaternion().
-		                                                GetForwardVector();
+		                                      GetForwardVector();
 		Camera->SetRelativeLocation(
 			NewOffsetDirection *= (CameraHit.Distance - CameraSkinWidth));
-		FColor TraceColor = CameraHit.bBlockingHit ? FColor::Red : FColor::Green;
-		FVector HitLocation = CameraHit.ImpactPoint;
-		DrawDebugSphere(GetWorld(), HitLocation, 10, 12, TraceColor, false, 1.0f);
 	}
 }

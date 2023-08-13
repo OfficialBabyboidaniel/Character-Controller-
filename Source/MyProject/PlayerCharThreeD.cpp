@@ -107,6 +107,11 @@ float APlayerCharThreeD::GetYawAxisValue() const
 	return YawAxisValue;
 }
 
+UStateMachineComponent* APlayerCharThreeD::GetStateMachine() const
+{
+	return StateMachineComponent;
+}
+
 //set functions
 void APlayerCharThreeD::SetCurrentInput(const FVector NewValue)
 {
