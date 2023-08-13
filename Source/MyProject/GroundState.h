@@ -31,7 +31,7 @@ public:
 private:
 	
 	//Vectors values
-	//FVector CurrentInput;
+	FVector CurrentInput;
 	FVector Velocity = FVector::ZeroVector;
 	//FVector JumpMovement;
 	FVector Gravity;

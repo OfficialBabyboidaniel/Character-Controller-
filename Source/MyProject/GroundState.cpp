@@ -18,6 +18,7 @@
 
 UGroundState::UGroundState()
 {
+	
 }
 
 void UGroundState::BeginPlay()
@@ -49,6 +50,7 @@ void UGroundState::Update(float DeltaTime)
 	Super::Update(DeltaTime);
 	//UE_LOG(LogTemp, Warning, TEXT("groundState ticking"));
 
+	
 	//camera rotaion
 	CameraInput.Z += PlayerCharThreeD->GetYawAxisValue() * MouseSensitivity;
 	CameraInput.Y += PlayerCharThreeD->GetPitchAxisValue() * MouseSensitivity;
@@ -60,6 +62,8 @@ void UGroundState::Update(float DeltaTime)
 		SetInitialCameraLocation(DeltaTime);
 		CameraCollisionCheck();
 	}
+
+	CurrentInput = PlayerCharThreeD->GetCurrentInput();
 
 	CaluclateInitialVelocity(DeltaTime);
 	CalculateInput(DeltaTime);
@@ -240,10 +244,10 @@ void UGroundState::CalculateInput(float DeltaTime)
 {
 	FQuat InputQuat = FQuat::MakeFromEuler(EulerRotation);
 
-	if (PlayerCharThreeD->GetCurrentInput().Size() > 0.1)
+	if (CurrentInput.Size() > 0.1)
 	{
-		PlayerCharThreeD->GetCurrentInput() = InputQuat * PlayerCharThreeD->GetCurrentInput().GetSafeNormal();
-		UE_LOG(LogTemp, Warning, TEXT("CurrentInput size: %f"), PlayerCharThreeD->GetCurrentInput().Size());
+		CurrentInput = InputQuat * CurrentInput.GetSafeNormal();
+		UE_LOG(LogTemp, Warning, TEXT("CurrentInput size: %f"), CurrentInput.Size());
 	}
 
 
@@ -255,13 +259,13 @@ void UGroundState::CalculateInput(float DeltaTime)
 	                                             FCollisionShape::MakeCapsule(Extent), Params);
 	if (bHit)
 	{
-		PlayerCharThreeD->GetCurrentInput() = FVector::VectorPlaneProject(
-			PlayerCharThreeD->GetCurrentInput().GetSafeNormal() * Acceleration * DeltaTime,
+		CurrentInput = FVector::VectorPlaneProject(
+			CurrentInput.GetSafeNormal() * Acceleration * DeltaTime,
 			Hit.ImpactNormal);
 	}
-	if (PlayerCharThreeD->GetCurrentInput().Size() > 1) PlayerCharThreeD->GetCurrentInput().Normalize(1);
+	if (CurrentInput.Size() > 1) CurrentInput.Normalize(1);
 	//UE_LOG(LogTemp, Warning, TEXT("CurrentInput size: %f"), CurrentInput.Size());
-	Velocity += (PlayerCharThreeD->GetCurrentInput().GetSafeNormal() * Acceleration * DeltaTime);
+	Velocity += (CurrentInput.GetSafeNormal() * Acceleration * DeltaTime);
 }
 
 void UGroundState::ApplyFriction(float DeltaTime, float NormalMagnitude)
@@ -275,6 +279,8 @@ void UGroundState::ApplyFriction(float DeltaTime, float NormalMagnitude)
 	{
 		Velocity -= Velocity.GetSafeNormal() * NormalMagnitude *
 			KineticFrictionCoefficient;
+
+		//ska delta time vara här? 
 	}
 }
 
