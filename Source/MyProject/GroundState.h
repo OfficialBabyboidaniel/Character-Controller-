@@ -58,10 +58,7 @@ private:
 	FVector RotationY;
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	FVector RotationZ;
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	double YawAxisValue;
-	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
-	double PitchAxisValue;
+	
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	double OffsetDistance;
 	UPROPERTY(EditAnywhere, Category="Camera Stats")

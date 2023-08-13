@@ -211,6 +211,7 @@ void APlayerCharThreeD::JumpInput()
 }
 
 
+/*
 void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 {
 	GetActorBounds(true, Origin, Extent);
@@ -234,7 +235,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		FCollisionShape::MakeCapsule(Extent),
 		Params);
 	/*bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
-	                                          FCollisionShape::MakeCapsule(Extent), Params);*/
+	                                          FCollisionShape::MakeCapsule(Extent), Params);#1#
 
 	//	UE_LOG(LogTemp, Warning, TEXT("Velocity after first sweep %s"), *Velocity.ToString());
 	// ta bort sen
@@ -252,7 +253,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 	if (bHit)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("First bhit true"));
-		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth) /** DeltaTime*/; // delta time?
+		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth) /** DeltaTime#1#; // delta time?
 		//UE_LOG(LogTemp, Warning, TEXT("TraceEnd: %s"), *TraceEnd.ToString());
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeCapsule(Extent), Params);
@@ -280,12 +281,12 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 		bHit = this->GetCapsuleComponent()->ComputePenetration(MTD, FCollisionShape::MakeCapsule(Extent), Origin,
 		                                                       FQuat::Identity);
 		/*bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
-												FCollisionShape::MakeCapsule(Extent), Params);#1#
+												FCollisionShape::MakeCapsule(Extent), Params);#2#
 		//flytta actor mto normalen av träffpunkten
 		SetActorLocation(GetActorLocation() +
 			MTD.Direction * (MTD.Distance + SkinWidth));
 		Velocity += StaticHelperClass::DotProduct(Velocity, -MTD.Direction);
-	}*/
+	}#1#
 
 	if (Velocity.Size() < 0.1 && Hit.GetActor() != nullptr && Hit.GetActor()->GetVelocity().Size() < 0.1)
 	{
@@ -328,7 +329,7 @@ void APlayerCharThreeD::UpdateVelocity(float DeltaTime)
 			{
 				Velocity.X -= Difference.X;
 			}
-		}*/
+		}#1#
 		RecursivCounter++;
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
@@ -420,3 +421,4 @@ void APlayerCharThreeD::CameraCollisionCheck()
 		DrawDebugSphere(GetWorld(), HitLocation, 10, 12, TraceColor, false, 1.0f);
 	}
 }
+*/

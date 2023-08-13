@@ -98,6 +98,8 @@ void UGroundState::Update(float DeltaTime)
 	//SetActorLocation(GetActorLocation() + Velocity * AdjustedDeltaTime);
 	//UE_LOG(LogTemp, Warning, TEXT("Velocity whit delta time %s"), *(Velocity * AdjustedDeltaTime).ToString());
 	// Log Velocity
+
+	//reset values for next tick calculation
 	PlayerCharThreeD->SetCurrentInput(FVector::ZeroVector);
 	PlayerCharThreeD->SetJumpInput(FVector::ZeroVector);
 
@@ -296,7 +298,7 @@ void UGroundState::CalculatePitchInput()
 	{
 		EulerRotation.Y = FMath::Clamp(EulerRotation.Y, MinPitchRotation, MaxPitchRotaion);
 		//remove value so it does not add to the input forever, prevents a 180* spin 
-		CameraInput.Y -= PitchAxisValue * MouseSensitivity;
+		CameraInput.Y -= PlayerCharThreeD->GetPitchAxisValue() * MouseSensitivity;
 		CameraRotation.Y = EulerRotation.Y;
 	}
 }
