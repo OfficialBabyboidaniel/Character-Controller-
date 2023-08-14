@@ -133,7 +133,7 @@ void UAirState::UpdateVelocity(float DeltaTime)
 		//flytta actor mto normalen av träffpunkten
 		//UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
 		PlayerCharThreeD->SetActorLocation(
-			PlayerCharThreeD->GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
+			PlayerCharThreeD->GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) /** DeltaTime*/);
 		//UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
 		// delta time? 
 	}

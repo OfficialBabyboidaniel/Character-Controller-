@@ -2,7 +2,6 @@
 
 
 #include "GroundState.h"
-
 #include "PlayerCharThreeD.h"
 #include "StaticHelperClass.h"
 #include "Camera/CameraComponent.h"
@@ -61,7 +60,7 @@ void UGroundState::Update(float DeltaTime)
 	PlayerCharThreeD->SetJumpInput(FVector::ZeroVector);
 
 	//check if state is valid and if it should change state
-	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	/*PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	const FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
 	const bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
@@ -71,7 +70,7 @@ void UGroundState::Update(float DeltaTime)
 		//byte till airstate
 		PlayerCharThreeD->GetStateMachine()->ChangeState(PlayerCharThreeD->GetStateMachine()->States[1]);
 		return; 
-	}
+	}*/
 	//check done, continue with update function
 }
 
@@ -86,6 +85,7 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
 	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector: X=%f, Y=%f, Z=%f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
 	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector size: %f"), TraceEnd.Size());
+	
 	TArray<FOverlapResult> OverlapResult;
 
 
@@ -122,6 +122,8 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("TraceEnd: %s"), *TraceEnd.ToString());
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeCapsule(Extent), Params);
+
+		
 		DrawDebugLine(
 			GetWorld(),
 			TraceStart,
@@ -137,7 +139,7 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 		//flytta actor mto normalen av träffpunkten
 		//UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
 		PlayerCharThreeD->SetActorLocation(
-			PlayerCharThreeD->GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
+			PlayerCharThreeD->GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) /** DeltaTime*/);
 		//UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
 		// delta time? 
 	}
@@ -174,14 +176,14 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 			//UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *Hit.GetActor()->GetName());
 		}
 
-		//UE_LOG(LogTemp, Warning, TEXT("Velocity Before: X=%f, Y=%f, Z=%f"), Velocity.X, Velocity.Y, Velocity.Z);
+		UE_LOG(LogTemp, Warning, TEXT("Velocity Before normal power: X=%f, Y=%f, Z=%f"), Velocity.X, Velocity.Y, Velocity.Z);
 
 		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
 
 		Velocity += NormalPower;
-		//UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
 		// Log the normal power
-		//UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
+		UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
 
 
 		/*FVector GroundMovement = Hit.GetActor()->GetVelocity();
@@ -196,6 +198,8 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 				Velocity.X -= Difference.X;
 			}
 		}*/
+
+		
 		RecursivCounter++;
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);

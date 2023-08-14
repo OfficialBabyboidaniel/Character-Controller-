@@ -23,6 +23,7 @@ APlayerPawn::APlayerPawn()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	// create mesh
 	OurVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OurVisibleComponent"));
+	
 	// create camera
 	auto PlayerCamera = CreateDefaultSubobject<UCameraComponent>(
 		TEXT("PlayerCamera"));
@@ -155,7 +156,7 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth);
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
-		//SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
+		
 
 		UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
 		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
