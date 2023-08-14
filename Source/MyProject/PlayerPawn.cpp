@@ -10,7 +10,6 @@
 #include "StaticHelperClass.h"
 #include "Styling/StyleColors.h"
 #include "Util/ColorConstants.h"
-#include "DrawDebugHelpers.h"
 // Sets default values
 APlayerPawn::APlayerPawn()
 {
@@ -23,7 +22,7 @@ APlayerPawn::APlayerPawn()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	// create mesh
 	OurVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OurVisibleComponent"));
-	
+
 	// create camera
 	auto PlayerCamera = CreateDefaultSubobject<UCameraComponent>(
 		TEXT("PlayerCamera"));
@@ -50,32 +49,23 @@ void APlayerPawn::BeginPlay()
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	Gravity = FVector::DownVector * GravityForce * DeltaTime;
-
-	//addera jump och gravity 
-	Velocity += Gravity + JumpMovement;
+	CalculateInitialVelocity(DeltaTime);
 	//calculera input.
 	CalculateInput(DeltaTime);
+
 	//multiplicera med luftmotstånd
-
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
-
 	double StartTime = FPlatformTime::Seconds();
-
-	// Call the UpdateVelocity function
 	UpdateVelocity(DeltaTime);
-
-	// Get the current time after UpdateVelocity has finished
 	double EndTime = FPlatformTime::Seconds();
 
 	// Calculate the time taken by UpdateVelocity
 	double TimeTaken = EndTime - StartTime;
-
-	// Subtract the time taken by UpdateVelocity from DeltaTime
 	float AdjustedDeltaTime = FMath::Max(DeltaTime - TimeTaken, 0.0f);
 
 	// Y axis zero to stay in 2D.
 	Velocity.Y = 0;
+	//clamp to maxspeed if needed
 	if (Velocity.Size() > MaxSpeed)
 	{
 		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
@@ -140,27 +130,16 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		FCollisionShape::MakeBox(Extent),
 		Params);
 
-	// ta bort sen
-	DrawDebugLine(
-		GetWorld(),
-		TraceStart,
-		TraceEnd,
-		FColor::Red, // Line color (you can change this to any color you like)
-		false, // Persistent (false means the line will disappear after one frame)
-		5.0f, // LifeTime (negative value means the line will stay forever)
-		0, // DepthPriority (you can adjust this if necessary)
-		2.0f // Thickness (you can adjust this to change the line's thickness)
-	);
 	if (bHit)
 	{
 		TraceEnd = Origin - Hit.Normal * (Hit.Distance + SkinWidth);
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeBox(Extent), Params);
-		
 
-		UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
+
+		
 		SetActorLocation(GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
-		UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
+		
 	}
 
 	if (Velocity.Size() < 0.1 && Hit.GetActor() != nullptr && Hit.GetActor()->GetVelocity().Size() < 0.1)
@@ -181,14 +160,23 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		FVector GroundMovement = Hit.GetActor()->GetVelocity();
 		if (GroundMovement.Size() > 0.1)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Ground Movement size = %f"), GroundMovement.Size());
+			
+			UE_LOG(LogTemp, Warning, TEXT("Ground Movement  = %s"), *GroundMovement.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Velocity Movement before = %s"), *Velocity.ToString());
 			FVector Difference = FVector::ZeroVector;
-			Difference.X = Velocity.X - GroundMovement.X;
+			Difference.X = GroundMovement.X - Velocity.X;
+			UE_LOG(LogTemp, Warning, TEXT("Difference Movement  = %s"), *Difference.ToString());
 			FVector FriktionPower = NormalPower * StaticFrictionCoefficient;
-			if (Difference.Size() > FriktionPower.Size())
+			UE_LOG(LogTemp, Warning, TEXT("Friktion Movement  = %s"), *FriktionPower.ToString());
+			Velocity.X += Difference.X;
+			UE_LOG(LogTemp, Warning, TEXT("Velocity Movement after = %s"), *Velocity.ToString());
+			/*
+			if (Difference.Size() < FriktionPower.Size())
 			{
-				Velocity.X -= Difference.X;
-			}
+				UE_LOG(LogTemp, Warning, TEXT("Velocity Movement before = %s"), *Velocity.ToString());
+				Velocity.X = GroundMovement.X;
+				UE_LOG(LogTemp, Warning, TEXT("Velocity Movement after  = %s"), *Velocity.ToString());
+			}*/
 		}
 
 		RecursivCounter++;
@@ -196,6 +184,16 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 		UpdateVelocity(DeltaTime);
 	}
 	RecursivCounter = 0;
+}
+
+
+//Helper functions
+
+void APlayerPawn::CalculateInitialVelocity(float DeltaTime)
+{
+	Gravity = FVector::DownVector * GravityForce * DeltaTime;
+
+	Velocity += Gravity + JumpMovement;
 }
 
 void APlayerPawn::CalculateInput(float DeltaTime)

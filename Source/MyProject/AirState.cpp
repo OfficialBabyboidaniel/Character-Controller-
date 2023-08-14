@@ -178,20 +178,7 @@ void UAirState::UpdateVelocity(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
 		// Log the normal power
 		//UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
-
-
-		/*FVector GroundMovement = Hit.GetActor()->GetVelocity();
-		if (GroundMovement.Size() > 0.1)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Ground Movement size = %f"), GroundMovement.Size());
-			FVector Difference = FVector::ZeroVector;
-			Difference.X = Velocity.X - GroundMovement.X;
-			FVector FriktionPower = NormalPower * StaticFrictionCoefficient;
-			if (Difference.Size() > FriktionPower.Size())
-			{
-				Velocity.X -= Difference.X;
-			}
-		}*/
+		
 		RecursivCounter++;
 		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);

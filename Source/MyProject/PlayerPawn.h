@@ -40,7 +40,7 @@ public:
 
 	//distance value
 	double Distance;
-	
+
 	//Sweep values
 	FVector Origin, Extent;
 	FCollisionQueryParams Params;
@@ -63,13 +63,13 @@ public:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	double StaticFrictionCoefficient = 0.6;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	double KineticFrictionCoefficient  = 0.4;
+	double KineticFrictionCoefficient = 0.4;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	double  AirResistanceCoefficient  = 0.6;
-
+	double AirResistanceCoefficient = 0.6;
 
 	//functions
 	void UpdateVelocity(float DeltaTime);
 	void CalculateInput(float DeltaTime);
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
+	void CalculateInitialVelocity(float DeltaTime);
 };
