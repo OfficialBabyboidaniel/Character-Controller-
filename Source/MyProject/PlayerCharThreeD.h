@@ -59,11 +59,11 @@ private:
 
 	//jump info 
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 1.5f;
+	float GroundCheckDistance = 2.2f;
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float JumpForce = 500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float SkinWidth = 1.2f;
+	float SkinWidth = 2.0f;
 
 	UPROPERTY(VisibleAnywhere, Category="State")
 	class UStateComponent* CurrentState;

@@ -154,9 +154,7 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 	}
 	if (bHit)
 	{
-		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
-		Velocity += NormalPower;
-
+		
 		FVector GroundMovement = Hit.GetActor()->GetVelocity();
 		if (GroundMovement.Size() > 0.1)
 		{
@@ -166,23 +164,19 @@ void APlayerPawn::UpdateVelocity(float DeltaTime)
 			FVector Difference = FVector::ZeroVector;
 			Difference.X = GroundMovement.X - Velocity.X;
 			UE_LOG(LogTemp, Warning, TEXT("Difference Movement  = %s"), *Difference.ToString());
-			FVector FriktionPower = NormalPower * StaticFrictionCoefficient;
+			FVector FriktionPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal) * StaticFrictionCoefficient;
 			UE_LOG(LogTemp, Warning, TEXT("Friktion Movement  = %s"), *FriktionPower.ToString());
 			Velocity.X += Difference.X;
-			UE_LOG(LogTemp, Warning, TEXT("Velocity Movement after = %s"), *Velocity.ToString());
-			/*
-			if (Difference.Size() < FriktionPower.Size())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Velocity Movement before = %s"), *Velocity.ToString());
-				Velocity.X = GroundMovement.X;
-				UE_LOG(LogTemp, Warning, TEXT("Velocity Movement after  = %s"), *Velocity.ToString());
-			}*/
+			UE_LOG(LogTemp, Warning, TEXT("Velocity Movement after = %s"), *Velocity.ToString())
 		}
 
 		RecursivCounter++;
-		ApplyFriction(DeltaTime, NormalPower.Size());
 		UpdateVelocity(DeltaTime);
 	}
+	FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
+	Velocity += NormalPower;
+	ApplyFriction(DeltaTime, NormalPower.Size());
+
 	RecursivCounter = 0;
 }
 

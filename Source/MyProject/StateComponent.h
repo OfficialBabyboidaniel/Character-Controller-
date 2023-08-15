@@ -39,15 +39,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float JumpForce = 1500.0f;
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float GroundCheckDistance = 1.5f;
+	float GroundCheckDistance = 2.2f;
 
 	UPROPERTY(EditAnywhere, Category="Stats")
-	float SkinWidth = 1.2f;
+	float SkinWidth = 2.0f;
 	// use to be 1.2
 
 	
 	//vector value
 	FVector Velocity = FVector::ZeroVector;
+	//for update vel function
+	FVector OriginalLocationBeforeUpdate;
 	
 	//Sweep values
 	FVector Origin, Extent;

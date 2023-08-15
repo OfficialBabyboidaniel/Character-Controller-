@@ -76,7 +76,7 @@ void APlayerCharThreeD::JumpInput()
 	GetActorBounds(true, Origin, Extent);
 	Params.AddIgnoredActor(this);
 	FHitResult Hit;
-	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
+	const FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
 	bool bHit = GetWorld()->SweepSingleByChannel(Hit, Origin, TraceEnd, FQuat::Identity, ECC_Pawn,
 	                                             FCollisionShape::MakeCapsule(Extent), Params);
 	if (bHit)

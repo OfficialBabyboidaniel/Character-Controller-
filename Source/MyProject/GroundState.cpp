@@ -10,17 +10,16 @@
 #include "DrawDebugHelpers.h"
 #include "Quaternion.h"
 #include "StateMachineComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Math/UnrealMathUtility.h"
 
 UGroundState::UGroundState()
 {
-	
 }
 
 void UGroundState::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void UGroundState::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -36,14 +35,15 @@ void UGroundState::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UGroundState::Update(float DeltaTime)
 {
 	Super::Update(DeltaTime);
-	
+
 	CurrentInput = PlayerCharThreeD->GetCurrentInput();
 	CalculateInitialVelocity(DeltaTime);
 	CalculateInput(DeltaTime);
-	
+
 	Velocity *= FMath::Pow(AirResistanceCoefficient, DeltaTime);
 
 	const double StartTime = FPlatformTime::Seconds();
+	OriginalLocationBeforeUpdate = PlayerCharThreeD->GetActorLocation();
 	UpdateVelocity(DeltaTime);
 	const double EndTime = FPlatformTime::Seconds();
 	const double TimeTaken = EndTime - StartTime;
@@ -53,7 +53,7 @@ void UGroundState::Update(float DeltaTime)
 	{
 		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
 	}
-	
+
 	PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() + Velocity * AdjustedDeltaTime);
 	//reset values for next tick calculation
 	PlayerCharThreeD->SetCurrentInput(FVector::ZeroVector);
@@ -75,22 +75,18 @@ void UGroundState::Update(float DeltaTime)
 }
 
 
-
 void UGroundState::UpdateVelocity(float DeltaTime)
 {
 	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	Params.AddIgnoredActor(PlayerCharThreeD);
 	FHitResult Hit;
 	FHitResult NormalHit;
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
-	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector: X=%f, Y=%f, Z=%f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
-	//UE_LOG(LogTemp, Warning, TEXT("TraceEnd vector size: %f"), TraceEnd.Size());
-	
-	TArray<FOverlapResult> OverlapResult;
 
+	UE_LOG(LogTemp, Warning, TEXT("Velocity size %f"), Velocity.Size());
 
 	bool bHit = false;
-	bool bHit2 = false;
 	bHit = GetWorld()->SweepSingleByChannel(
 		Hit,
 		TraceStart,
@@ -99,21 +95,6 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 		ECC_Pawn,
 		FCollisionShape::MakeCapsule(Extent),
 		Params);
-	/*bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
-	                                          FCollisionShape::MakeCapsule(Extent), Params);*/
-
-	//	UE_LOG(LogTemp, Warning, TEXT("Velocity after first sweep %s"), *Velocity.ToString());
-	// ta bort sen
-	DrawDebugLine(
-		GetWorld(),
-		TraceStart,
-		TraceEnd,
-		FColor::Red, // Line color (you can change this to any color you like)
-		false, // Persistent (false means the line will disappear after one frame)
-		5.0f, // LifeTime (negative value means the line will stay forever)
-		0, // DepthPriority (you can adjust this if necessary)
-		2.0f // Thickness (you can adjust this to change the line's thickness)
-	);
 
 	if (bHit)
 	{
@@ -122,77 +103,130 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("TraceEnd: %s"), *TraceEnd.ToString());
 		bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
 		                                        FCollisionShape::MakeCapsule(Extent), Params);
-
-		
-		DrawDebugLine(
-			GetWorld(),
-			TraceStart,
-			TraceEnd,
-			FColor::Blue, // Line color (you can change this to any color you like)
-			false, // Persistent (false means the line will disappear after one frame)
-			5.0f, // LifeTime (negative value means the line will stay forever)
-			0, // DepthPriority (you can adjust this if necessary)
-			2.0f // Thickness (you can adjust this to change the line's thickness)
-		);
-		//UE_LOG(LogTemp, Warning, TEXT("Velocity after Second sweep %s"), *Velocity.ToString());
-
-		//flytta actor mto normalen av träffpunkten
-		//UE_LOG(LogTemp, Warning, TEXT("Actor Location before: %s"), *GetActorLocation().ToString());
 		PlayerCharThreeD->SetActorLocation(
 			PlayerCharThreeD->GetActorLocation() - Hit.Normal * (NormalHit.Distance - SkinWidth) * DeltaTime);
-		//UE_LOG(LogTemp, Warning, TEXT("Actor Location after: %s"), *GetActorLocation().ToString());
-		// delta time? 
 	}
-	/*if (!bHit && bHit2)
-	{
-		FMTDResult MTD;
-		bHit = this->GetCapsuleComponent()->ComputePenetration(MTD, FCollisionShape::MakeCapsule(Extent), Origin,
-		                                                       FQuat::Identity);
-		/*bHit = GetWorld()->SweepSingleByChannel(NormalHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Pawn,
-												FCollisionShape::MakeCapsule(Extent), Params);#1#
-		//flytta actor mto normalen av träffpunkten
-		SetActorLocation(GetActorLocation() +
-			MTD.Direction * (MTD.Distance + SkinWidth));
-		Velocity += StaticHelperClass::DotProduct(Velocity, -MTD.Direction);
-	}*/
 
-	if (Velocity.Size() < 0.1 && Hit.GetActor() != nullptr && Hit.GetActor()->GetVelocity().Size() < 0.1)
+	if (Velocity.Size() < 0.1)
 	{
 		RecursivCounter = 0;
 		Velocity = FVector::ZeroVector;
 	}
 
-	if (RecursivCounter > 10)
+	if (RecursivCounter > 5)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("recursvie counter normal sweep %d"), RecursivCounter);
 		RecursivCounter = 0;
-		Velocity = FVector::ZeroVector;
+		OverlapCollisionUpdate(DeltaTime);
 	}
-
-	if (bHit || bHit2)
+	else
 	{
-		if (Hit.GetActor() != nullptr)
+		if (bHit)
 		{
-			// Log the name of the actor that was hit
-			//UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *Hit.GetActor()->GetName());
+			RecursivCounter++;
+			UpdateVelocity(DeltaTime);
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("Velocity Before normal power: X=%f, Y=%f, Z=%f"), Velocity.X, Velocity.Y, Velocity.Z);
-
-		FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
-
-		Velocity += NormalPower;
-		UE_LOG(LogTemp, Warning, TEXT("Velocity after normal power sweep %s"), *Velocity.ToString());
-		// Log the normal power
-		UE_LOG(LogTemp, Warning, TEXT("Normal Power: X=%f, Y=%f, Z=%f"), NormalPower.X, NormalPower.Y, NormalPower.Z);
-		
-		RecursivCounter++;
-		ApplyFriction(DeltaTime, NormalPower.Size());
-		UpdateVelocity(DeltaTime);
 	}
+	FVector NormalPower = StaticHelperClass::DotProduct(Velocity, Hit.ImpactNormal);
+	Velocity += NormalPower;
+	ApplyFriction(DeltaTime, NormalPower.Size());
+	// Log the normal power
+			
 	//UE_LOG(LogTemp, Warning, TEXT("RecursivCounter: %d"), RecursivCounter);
 
 	RecursivCounter = 0;
 }
+
+void UGroundState::OverlapCollisionUpdate(float DeltaTime)
+{
+	/*PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	Params.AddIgnoredActor(PlayerCharThreeD);
+	const FVector TraceStart = Origin;
+
+	TArray<FOverlapResult> OverlapResult;
+
+	bool bHit2 = false;
+	bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
+	                                          FCollisionShape::MakeCapsule(Extent), Params);
+
+	if (RecursivCounter > 5)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("recursvie counter overlap %d"), RecursivCounter);
+		RecursivCounter = 0;
+		PlayerCharThreeD->SetActorLocation(OriginalLocationBeforeUpdate);
+		//	return;
+	}
+	else
+	{
+		if (bHit2)
+		{
+			FVector ColliderOrigin;
+			FVector ColliderExtent;
+			OverlapResult[0].GetActor()->GetActorBounds(true, ColliderOrigin, ColliderExtent);
+			FMTDResult MTD;
+			bHit2 = PlayerCharThreeD->GetCapsuleComponent()->ComputePenetration(
+				MTD, FCollisionShape::MakeCapsule(ColliderExtent), ColliderOrigin,
+				OverlapResult[0].GetActor()->GetActorQuat()
+			);
+			// origin eller get actor location eller något från overlap result?
+			//verkar inte göra nån skillnad
+
+
+			PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() +
+				MTD.Direction * (MTD.Distance + SkinWidth));
+			Velocity += StaticHelperClass::DotProduct(Velocity, -MTD.Direction);
+			ApplyFriction(DeltaTime, StaticHelperClass::DotProduct(Velocity, -MTD.Direction).Size());
+			RecursivCounter++;
+			OverlapCollisionUpdate(DeltaTime);
+		}
+	}*/
+	
+	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	
+	Params.AddIgnoredActor(PlayerCharThreeD);
+	const FVector TraceStart = Origin;
+
+	TArray<FOverlapResult> OverlapResult;
+
+	bool bHit2 = false;
+	bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
+											  FCollisionShape::MakeCapsule(Extent), Params);
+	FMTDResult MTD;
+	if (bHit2)
+	{
+		if (RecursivCounter < 5)
+		{
+			FVector ColliderOrigin;
+			FVector ColliderExtent;
+			OverlapResult[0].GetActor()->GetActorBounds(true, ColliderOrigin, ColliderExtent);
+			
+			bool bCanResolveCollision = PlayerCharThreeD->GetCapsuleComponent()->ComputePenetration(
+				MTD, OverlapResult[0].GetComponent()->GetCollisionShape(), ColliderOrigin,
+				OverlapResult[0].GetActor()->GetActorQuat()
+			);
+
+			//moving the collision way out. im litterally just teleporting
+			
+			if (bCanResolveCollision)
+			{
+				PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() +
+					MTD.Direction * (MTD.Distance + SkinWidth));
+				// Recursive call to continue resolving collisions
+				OverlapCollisionUpdate(DeltaTime);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Reached maximum recursion depth. Exiting collision resolution."));
+		}
+	}
+	
+	Velocity += StaticHelperClass::DotProduct(Velocity, -MTD.Direction);
+	ApplyFriction(DeltaTime, StaticHelperClass::DotProduct(Velocity, -MTD.Direction).Size());
+	RecursivCounter++;
+	RecursivCounter = 0;
+}
+
 
 void UGroundState::CalculateInput(float DeltaTime)
 {
@@ -202,7 +236,7 @@ void UGroundState::CalculateInput(float DeltaTime)
 	{
 		CurrentInput = InputQuat * CurrentInput.GetSafeNormal();
 	}
-	
+
 	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
 	FHitResult Hit;
 	FVector TraceEnd = Origin + FVector::DownVector * (GroundCheckDistance + SkinWidth);
@@ -216,7 +250,7 @@ void UGroundState::CalculateInput(float DeltaTime)
 			Hit.ImpactNormal);
 	}
 	if (CurrentInput.Size() > 1) CurrentInput.Normalize(1);
-	
+
 	Velocity += CurrentInput.GetSafeNormal() * Acceleration * DeltaTime;
 }
 
@@ -245,4 +279,3 @@ void UGroundState::CalculateInitialVelocity(float DeltaTime)
 
 	Velocity += Gravity + PlayerCharThreeD->GetJumpInput();
 }
-

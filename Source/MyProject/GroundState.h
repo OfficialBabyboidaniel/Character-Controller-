@@ -39,7 +39,6 @@ private:
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float MaxSpeed = 2500.0f;
 	
-
 	//Physics values
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float GravityForce = 300.0f;
@@ -60,9 +59,10 @@ private:
 	int RecursivCounter = 0;
 	//functions
 	void UpdateVelocity(float DeltaTime);
+	void OverlapCollisionUpdate(float DeltaTime);
+	
 	void CalculateInput(float DeltaTime);
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
-	
 	
 	void CalculateInitialVelocity(float DeltaTime);
 };
