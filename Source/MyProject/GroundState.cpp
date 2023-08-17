@@ -84,7 +84,6 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 	FVector TraceStart = Origin;
 	FVector TraceEnd = Origin + Velocity.GetSafeNormal() * (Velocity.Size() + SkinWidth) * DeltaTime;
 
-	UE_LOG(LogTemp, Warning, TEXT("Velocity size %f"), Velocity.Size());
 
 	bool bHit = false;
 	bHit = GetWorld()->SweepSingleByChannel(
@@ -131,7 +130,7 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 	Velocity += NormalPower;
 	ApplyFriction(DeltaTime, NormalPower.Size());
 	// Log the normal power
-			
+
 	//UE_LOG(LogTemp, Warning, TEXT("RecursivCounter: %d"), RecursivCounter);
 
 	RecursivCounter = 0;
@@ -139,7 +138,8 @@ void UGroundState::UpdateVelocity(float DeltaTime)
 
 void UGroundState::OverlapCollisionUpdate(float DeltaTime)
 {
-	/*PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
+
 	Params.AddIgnoredActor(PlayerCharThreeD);
 	const FVector TraceStart = Origin;
 
@@ -148,49 +148,6 @@ void UGroundState::OverlapCollisionUpdate(float DeltaTime)
 	bool bHit2 = false;
 	bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
 	                                          FCollisionShape::MakeCapsule(Extent), Params);
-
-	if (RecursivCounter > 5)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("recursvie counter overlap %d"), RecursivCounter);
-		RecursivCounter = 0;
-		PlayerCharThreeD->SetActorLocation(OriginalLocationBeforeUpdate);
-		//	return;
-	}
-	else
-	{
-		if (bHit2)
-		{
-			FVector ColliderOrigin;
-			FVector ColliderExtent;
-			OverlapResult[0].GetActor()->GetActorBounds(true, ColliderOrigin, ColliderExtent);
-			FMTDResult MTD;
-			bHit2 = PlayerCharThreeD->GetCapsuleComponent()->ComputePenetration(
-				MTD, FCollisionShape::MakeCapsule(ColliderExtent), ColliderOrigin,
-				OverlapResult[0].GetActor()->GetActorQuat()
-			);
-			// origin eller get actor location eller något från overlap result?
-			//verkar inte göra nån skillnad
-
-
-			PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() +
-				MTD.Direction * (MTD.Distance + SkinWidth));
-			Velocity += StaticHelperClass::DotProduct(Velocity, -MTD.Direction);
-			ApplyFriction(DeltaTime, StaticHelperClass::DotProduct(Velocity, -MTD.Direction).Size());
-			RecursivCounter++;
-			OverlapCollisionUpdate(DeltaTime);
-		}
-	}*/
-	
-	PlayerCharThreeD->GetActorBounds(true, Origin, Extent);
-	
-	Params.AddIgnoredActor(PlayerCharThreeD);
-	const FVector TraceStart = Origin;
-
-	TArray<FOverlapResult> OverlapResult;
-
-	bool bHit2 = false;
-	bHit2 = GetWorld()->OverlapMultiByChannel(OverlapResult, TraceStart, FQuat::Identity, ECC_Pawn,
-											  FCollisionShape::MakeCapsule(Extent), Params);
 	FMTDResult MTD;
 	if (bHit2)
 	{
@@ -199,19 +156,33 @@ void UGroundState::OverlapCollisionUpdate(float DeltaTime)
 			FVector ColliderOrigin;
 			FVector ColliderExtent;
 			OverlapResult[0].GetActor()->GetActorBounds(true, ColliderOrigin, ColliderExtent);
-			
+
+			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor's Name: %s"), *OverlapResult[0].GetActor()->GetName());
+
 			bool bCanResolveCollision = PlayerCharThreeD->GetCapsuleComponent()->ComputePenetration(
 				MTD, OverlapResult[0].GetComponent()->GetCollisionShape(), ColliderOrigin,
 				OverlapResult[0].GetActor()->GetActorQuat()
 			);
 
 			//moving the collision way out. im litterally just teleporting
-			
+
 			if (bCanResolveCollision)
 			{
-				PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() +
-					MTD.Direction * (MTD.Distance + SkinWidth));
+				UE_LOG(LogTemp, Warning, TEXT("player location before move: %s"),
+				       *PlayerCharThreeD->GetActorLocation().ToString());
+
+				// sätt en begränsing på förflyttningens storlek
+				if (FVector::Distance(OriginalLocationBeforeUpdate, PlayerCharThreeD->GetActorLocation() +
+				                      MTD.Direction * (MTD.Distance + SkinWidth)) < SkinWidth * 2 )
+				{
+					PlayerCharThreeD->SetActorLocation(PlayerCharThreeD->GetActorLocation() +
+						MTD.Direction * (MTD.Distance + SkinWidth) * DeltaTime);
+					//delta time? 
+				}
+				UE_LOG(LogTemp, Warning, TEXT("player location after move: %s"),
+				       *PlayerCharThreeD->GetActorLocation().ToString());
 				// Recursive call to continue resolving collisions
+				RecursivCounter++;
 				OverlapCollisionUpdate(DeltaTime);
 			}
 		}
@@ -220,10 +191,11 @@ void UGroundState::OverlapCollisionUpdate(float DeltaTime)
 			UE_LOG(LogTemp, Warning, TEXT("Reached maximum recursion depth. Exiting collision resolution."));
 		}
 	}
-	
+
 	Velocity += StaticHelperClass::DotProduct(Velocity, -MTD.Direction);
+	UE_LOG(LogTemp, Warning, TEXT("player location after normal power: %s"),
+	       *PlayerCharThreeD->GetActorLocation().ToString());
 	ApplyFriction(DeltaTime, StaticHelperClass::DotProduct(Velocity, -MTD.Direction).Size());
-	RecursivCounter++;
 	RecursivCounter = 0;
 }
 
