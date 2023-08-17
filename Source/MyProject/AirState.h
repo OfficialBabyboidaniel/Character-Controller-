@@ -66,6 +66,7 @@ private:
 	int RecursivCounter = 0;
 	//functions
 	void UpdateVelocity(float DeltaTime);
+	void OverlapCollisionUpdate(float DeltaTime);
 	void CalculateInput(float DeltaTime);
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
 	

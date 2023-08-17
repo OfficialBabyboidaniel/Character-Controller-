@@ -97,6 +97,11 @@ FVector APlayerCharThreeD::GetJumpInput() const
 	return JumpMovement;
 }
 
+FVector APlayerCharThreeD::GetPlayerVelocity() const
+{
+	return Velocity;
+}
+
 float APlayerCharThreeD::GetPitchAxisValue() const
 {
 	return PitchAxisValue;
@@ -121,4 +126,9 @@ void APlayerCharThreeD::SetCurrentInput(const FVector NewValue)
 void APlayerCharThreeD::SetJumpInput(const FVector NewValue)
 {
 	JumpMovement = NewValue;
+}
+
+void APlayerCharThreeD::SetVelocity(const FVector NewValue)
+{
+	Velocity = NewValue;
 }

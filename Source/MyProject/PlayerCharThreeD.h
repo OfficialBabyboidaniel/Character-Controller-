@@ -31,11 +31,13 @@ public:
 	//get and set functions
 	FVector GetCurrentInput() const;
 	FVector GetJumpInput() const;
+	FVector GetPlayerVelocity() const;
 	float GetPitchAxisValue() const;
 	float GetYawAxisValue() const;
 	UStateMachineComponent* GetStateMachine() const;
 	void SetCurrentInput(const FVector NewValue);
 	void SetJumpInput(const FVector NewValue);
+	void SetVelocity(const FVector NewValue) ; 
 
 private:
 	void XInput(float AxisValue);
@@ -47,6 +49,7 @@ private:
 	//Vectors values
 	FVector CurrentInput;
 	FVector JumpMovement;
+	FVector Velocity;
 
 	UPROPERTY(VisibleAnywhere, Category="Camera Stats")
 	double YawAxisValue;

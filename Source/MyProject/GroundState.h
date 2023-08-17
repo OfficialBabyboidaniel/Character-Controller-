@@ -51,8 +51,6 @@ private:
 
 	//state values
 	UPROPERTY(VisibleAnywhere, Category="State")
-	class UStateComponent* CurrentState;
-	UPROPERTY(VisibleAnywhere, Category="State")
 	class UStateMachineComponent* StateMachineComponent;
 
 	// for update vel function
@@ -60,9 +58,7 @@ private:
 	//functions
 	void UpdateVelocity(float DeltaTime);
 	void OverlapCollisionUpdate(float DeltaTime);
-	
 	void CalculateInput(float DeltaTime);
 	void ApplyFriction(float DeltaTime, float NormalMagnitude);
-	
 	void CalculateInitialVelocity(float DeltaTime);
 };

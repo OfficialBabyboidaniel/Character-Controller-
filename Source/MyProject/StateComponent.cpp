@@ -61,6 +61,7 @@ void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 void UStateComponent::Enter()
 {
 	bShouldTick = true;
+	Velocity = PlayerCharThreeD->GetPlayerVelocity();
 }
 
 void UStateComponent::Update(float DeltaTime)

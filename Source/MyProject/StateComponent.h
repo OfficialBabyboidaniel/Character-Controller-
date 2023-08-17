@@ -43,11 +43,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float SkinWidth = 2.0f;
-	// use to be 1.2
-
 	
 	//vector value
-	FVector Velocity = FVector::ZeroVector;
+	FVector Velocity;
 	//for update vel function
 	FVector OriginalLocationBeforeUpdate;
 	
@@ -80,9 +78,7 @@ protected:
 	double MouseSensitivity = 2;
 	UPROPERTY(EditAnywhere, Category="Camera Stats")
 	double CameraSkinWidth = 5;
-
 	
-
 	void CalculatePitchInput();
 	void SetInitialCameraLocation(float DeltaTime);
 	void CameraCollisionCheck();

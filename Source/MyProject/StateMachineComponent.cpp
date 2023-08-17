@@ -13,17 +13,12 @@ UStateMachineComponent::UStateMachineComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ta bort denna sen
-	UStateComponent* AirStatee = CreateDefaultSubobject<UAirState>(TEXT("State"));
-
 	AirState = CreateDefaultSubobject<UAirState>(TEXT("AirState"));
 	GroundState = CreateDefaultSubobject<UGroundState>(TEXT("GroundState"));
-	if (AirStatee && AirState && GroundState)
+	if (AirState && GroundState)
 	{
 		States.Add(GroundState);
 		States.Add(AirState);
-		//ta bortt sen
-		States.Add(AirStatee);
 	}
 	// ...
 }
@@ -57,10 +52,8 @@ void UStateMachineComponent::ChangeState(UStateComponent* State)
 	if (CurrentState)
 		CurrentState->Exit();
 	if (State)
+	{
 		CurrentState = State;
-
-	if (State)
 		State->Enter();
-
-	
+	}
 }
